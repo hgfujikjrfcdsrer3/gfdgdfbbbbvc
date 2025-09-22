@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jiggy Menu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: rgba(15, 15, 20, 0.95);
+            --primary-text: #ffffff;
+            --secondary-text: #b0b0b0;
+            --accent-color: #8A2BE2;
+            --accent-color-hover: #9d4df7;
+            --highlight-bg: rgba(138, 43, 226, 0.85);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --font: 'Poppins', sans-serif;
+            --border-radius: 10px;
+            --transition-speed: 0.2s;
+            --success-color: #2ecc71;
+            --error-color: #ff4757;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
+            background-color: transparent;
+            color: var(--primary-text);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Menu Container */
+        .menu-container {
+            position: absolute;
+            top: 15vh;
+            left: 5vw;
+            width: 420px;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            visibility: hidden;
+            overflow: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform: translateY(-10px);
+            opacity: 0;
+        }
+
+        .menu-container.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .header-image {
+            width: 100%;
+            height: 120px;
+            background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border-color);
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            position: relative;
+        }
+
+        .header-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(to top, var(--bg-color), transparent);
+        }
+
+        .breadcrumb-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.3);
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        #breadcrumb { 
+            color: var(--secondary-text); 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        
+        #option-counter { 
+            color: var(--primary-text);
+            background: rgba(138, 43, 226, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Menu Items */
+        .menu-items {
+            list-style: none;
+            position: relative;
+            height: 410px;
+            overflow: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .menu-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            font-size: 15px;
+            position: relative;
+            height: 45px;
+            transition: background-color 0.15s ease;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .selection-highlight {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 45px;
+            background: var(--highlight-bg);
+            z-index: 1;
+            transition: top var(--transition-speed) ease-out;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .item-content {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        .item-label { 
+            flex-grow: 1; 
+            font-weight: 500;
+        }
+        
+        .item-value { 
+            color: var(--primary-text); 
+            font-weight: 500; 
+        }
+        
+        .toggle-indicator { 
+            font-weight: 600; 
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .toggle-indicator.on { 
+            color: var(--success-color); 
+            background: rgba(46, 204, 113, 0.2);
+        }
+        
+        .toggle-indicator.off { 
+            color: var(--error-color); 
+            background: rgba(255, 71, 87, 0.2);
+        }
+
+        .slider-bar {
+            width: 120px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slider-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 4px;
+            transition: width 0.2s ease;
+        }
+        
+        .slider-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        /* Footer */
+        .footer {
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid var(--border-color);
+            min-height: 20px;
+            font-size: 13px;
+            color: var(--secondary-text);
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .notification-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-color);
+            color: var(--primary-text);
+            padding: 12px 20px;
+            text-align: center;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+            z-index: 10000;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .notification-bar.visible {
+            transform: translateY(0);
+        }
+
+        .notification-bar .icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .notification-bar.success {
+            border-bottom: 2px solid var(--success-color);
+        }
+
+        .notification-bar.error {
+            border-bottom: 2px solid var(--error-color);
+        }
+
+        .notification-bar.warning {
+            border-bottom: 2px solid var(--warning-color);
+        }
+
+        .notification-bar.info {
+            border-bottom: 2px solid var(--info-color);
+        }
+
+        .notification {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            padding: 12px 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateX(20px);
+            animation: slideIn 0.3s forwards, fadeOut 0.3s 2.7s forwards;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification .icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .notification.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .notification.info {
+            border-left: 4px solid var(--info-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(20px); opacity: 0; }
+        }
+        
+        /* Input Overlay */
+        .input-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .input-overlay.visible {
+            opacity: 1;
+        }
+        
+        .input-box {
+            background: var(--bg-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            width: 400px;
+            text-align: center;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-overlay.visible .input-box {
+            transform: translateY(0);
+        }
+        
+        .input-box h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: var(--accent-color);
+        }
+        
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 10px;
+        }
+        
+        .input-box input:focus { 
+            outline: none; 
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
+        
+        .input-box input:hover {
+            border-color: rgba(138, 43, 226, 0.6);
+        }
+        
+        .input-box small {
+            color: var(--secondary-text);
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* Status Panel */
+        .status-panel {
+            position: absolute;
+            right: 50px;
+            top: 15vh;
+            width: 350px;
+            height: 500px;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            visibility: hidden;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform: translateX(10px);
+            opacity: 0;
+        }
+
+        .status-panel.visible {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .status-panel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .status-header {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        .status-content {
+            padding: 15px;
+        }
+
+        .status-item-external {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            transition: background-color 0.15s ease;
+        }
+
+        .status-item-external:last-child {
+            border-bottom: none;
+        }
+
+        .status-item-external:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-item-external.selected {
+            background: rgba(138, 43, 226, 0.2);
+            margin: 0 -15px;
+            padding: 10px 15px;
+        }
+
+        .status-on {
+            color: var(--success-color);
+            font-weight: 600;
+            background: rgba(46, 204, 113, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .status-off {
+            color: var(--error-color);
+            font-weight: 600;
+            background: rgba(255, 71, 87, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .status-unknown {
+            color: var(--warning-color);
+            font-weight: 600;
+            background: rgba(243, 156, 18, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Status Banner */
+        .jiggy-status-banner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            opacity: 1;
+            transform: translateY(0);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .jiggy-status-banner.loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        .jiggy-status-banner .icon {
+            font-size: 20px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Button Styles */
+        .btn {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--primary-text);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: rgba(138, 43, 226, 0.4);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="notification-container" id="notification-container"></div>
+<div class="notification-bar" id="notification-bar"></div>
+<div class="input-overlay hidden" id="input-overlay"></div>
+
+<div class="menu-container" id="menu-container">
+    <div class="header-image"></div>
+    <div class="breadcrumb-bar">
+        <span id="breadcrumb"></span>
+        <span id="option-counter"></span>
+    </div>
+    <ul class="menu-items" id="menu-items">
+        <div class="selection-highlight" id="selection-highlight"></div>
+    </ul>
+    <div class="footer" id="footer">
+    </div>
+</div>
+
+<div class="status-panel" id="status-panel">
+    <div class="status-header" id="status-header">STATUS</div>
+    <div class="status-content" id="status-content">
+    </div>
+</div>
+
+<div class="jiggy-status-banner" id="jiggy-status-banner">
+    <i class="fa-solid fa-shield-halved icon"></i>
+    UNDETECTED
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuItemsEl = document.getElementById('menu-items');
+        const breadcrumbEl = document.getElementById('breadcrumb');
+        const counterEl = document.getElementById('option-counter');
+        const footerEl = document.getElementById('footer');
+        let highlightEl = document.getElementById('selection-highlight');
+        const notificationContainer = document.getElementById('notification-container');
+        const notificationBar = document.getElementById('notification-bar');
+        const inputOverlay = document.getElementById('input-overlay');
+        const menuContainer = document.getElementById('menu-container');
+        const statusPanel = document.getElementById('status-panel');
+        const statusHeader = document.getElementById('status-header');
+        const statusContent = document.getElementById('status-content');
+        const banner = document.getElementById('jiggy-status-banner');
+
+        let currentMenuId = 'main';
+        let navigationStack = [];
+        let selectedIndex = 0;
+        let optionStates = {};
+        let currentState = null;
+        let isContentPanelOpen = false;
+        let welcomeMessageShown = false;
+        const MAX_VISIBLE_ITEMS = 10;
+        const ITEM_HEIGHT = 45;
+
+        const defaultMenuData = {
+            main: {
+                title: 'Loading Plug Menu...',
+                items: [
+                    { label: 'Loading Menu', target: 'self', description: 'Please Wait While The Menu Loads.' },
+                ]
+            }
+        };
+
+        function safeEncode(text) {
+            if (!text || typeof text !== 'string') return '';
+            return text.replace(/&/g, '&')
+                        .replace(/</g, '<')
+                        .replace(/>/g, '>')
+                        .replace(/"/g, '"')
+                        .replace(/'/g, ''');
+        }
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            let icon = '';
+            switch(type) {
+                case 'success': icon = '<i class="fa-solid fa-circle-check icon"></i>'; break;
+                case 'error': icon = '<i class="fa-solid fa-circle-xmark icon"></i>'; break;
+                case 'warning': icon = '<i class="fa-solid fa-triangle-exclamation icon"></i>'; break;
+                default: icon = '<i class="fa-solid fa-circle-info icon"></i>'; break;
+            }
+            
+            notification.innerHTML = `${icon}<span>${safeEncode(message)}</span>`;
+            notificationContainer.appendChild(notification);
+            setTimeout(() => { notification.remove(); }, 3000);
+        }
+
+        // New notification bar function
+        function showNotificationBar(message, type = 'info', duration = 3000) {
+            notificationBar.className = `notification-bar ${type}`;
+            
+            let icon = '';
+            switch(type) {
+                case 'success': icon = '<i class="fa-solid fa-circle-check icon"></i>'; break;
+                case 'error': icon = '<i class="fa-solid fa-circle-xmark icon"></i>'; break;
+                case 'warning': icon = '<i class="fa-solid fa-triangle-exclamation icon"></i>'; break;
+                default: icon = '<i class="fa-solid fa-circle-info icon"></i>'; break;
+            }
+            
+            notificationBar.innerHTML = `${icon}<span>${safeEncode(message)}</span>`;
+            notificationBar.classList.add('visible');
+            
+            setTimeout(() => {
+                notificationBar.classList.remove('visible');
+            }, duration);
+        }
+
+        // CodePlugMenuNotification function to replace MachoMenuNotification
+        window.CodePlugMenuNotification = function(title, message, duration = 3000, type = 'info') {
+            const fullMessage = title ? `${title}: ${message}` : message;
+            showNotificationBar(fullMessage, type, duration * 1000);
+        };
+
+        function showInputPrompt(title, placeholder, callback) {
+            inputOverlay.innerHTML = `
+                <div class="input-box">
+                    <h3>${title}</h3>
+                    <input type="text" id="prompt-input" placeholder="${placeholder}">
+                    <small>Press Enter to submit, Escape to cancel.</small>
+                    <div class="btn-group">
+                        <button class="btn" id="prompt-cancel">Cancel</button>
+                        <button class="btn" id="prompt-submit">Submit</button>
+                    </div>
+                </div>
+            `;
+            
+            inputOverlay.classList.remove('hidden');
+            inputOverlay.classList.add('visible');
+            
+            const inputField = document.getElementById('prompt-input');
+            const submitBtn = document.getElementById('prompt-submit');
+            const cancelBtn = document.getElementById('prompt-cancel');
+            
+            inputField.focus();
+
+            const close = () => {
+                inputOverlay.classList.remove('visible');
+                setTimeout(() => {
+                    inputOverlay.classList.add('hidden');
+                }, 300);
+                document.onkeydown = handleMenuInput;
+            };
+
+            const submit = () => {
+                callback(inputField.value);
+                close();
+            };
+
+            submitBtn.addEventListener('click', submit);
+            cancelBtn.addEventListener('click', close);
+
+            const keyHandler = (e) => {
+                if (e.key === 'Enter') {
+                    submit();
+                } else if (e.key === 'Escape') {
+                    close();
+                }
+            };
+            document.onkeydown = keyHandler;
+        }
+
+        function populateStatusContent(tabData, state) {
+            statusContent.innerHTML = '';
+            if (!tabData || !tabData.items || !Array.isArray(tabData.items)) return;
+
+            tabData.items.forEach((item, index) => {
+                const element = document.createElement('div');
+                element.className = 'status-item-external';
+                
+                if (state.selection && state.selection.index === index) {
+                    element.classList.add('selected');
+                }
+
+                const isToggleOrState = (item.type === 'toggle' || (item.label && (item.label.toLowerCase().includes('toggle') || item.label.toLowerCase().includes('enabled') || item.label.toLowerCase().includes('boost') || item.label.toLowerCase().includes('crasher'))));
+                const isResourceState = (tabData.key === 'resources' && item.state !== undefined);
+
+                if (isToggleOrState || isResourceState) {
+                    const statusClass = item.state ? (item.state === 'ON' ? 'status-on' : item.state === 'OFF' ? 'status-off' : 'status-unknown') : 'status-off';
+                    const statusText = item.state ? item.state : 'OFF';
+                    element.innerHTML = `<span>${safeEncode(item.label || 'Unknown')}</span><span class="${statusClass}">${safeEncode(statusText)}</span>`;
+                } else if (item.type === 'input') {
+                    element.innerHTML = `
+                        <div style="width: 100%;">
+                            <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeEncode(item.label)}</label>
+                            <input type="text" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--primary-text); border-radius: 4px;" value="${safeEncode(item.value || '')}" readonly>
+                        </div>`;
+                    element.classList.remove('status-item-external');
+                    element.style.padding = '10px';
+                } else {
+                    element.innerHTML = `<span>${safeEncode(item.label || 'Unknown')}</span>`;
+                }
+
+                element.addEventListener('click', () => {
+                    if (window.parent) {
+                        window.parent.postMessage({ action: 'select', itemIndex: index, isContentPanel: true }, '*');
+                    }
+                });
+
+                statusContent.appendChild(element);
+            });
+        }
+        
+        function updateMenuFromState(state) {
+            if (!state || !state.tabs) return;
+
+            currentState = state;
+            
+            menuItemsEl.innerHTML = `<div class="selection-highlight" id="selection-highlight"></div>`;
+            highlightEl = document.getElementById('selection-highlight');
+            
+            const menuItems = state.tabs.map((tabData, index) => ({
+                label: tabData.title || `Tab ${index + 1}`,
+                tabIndex: index,
+                type: 'tab',
+                description: `Open ${tabData.title || `Tab ${index + 1}`}`
+            }));
+
+            menuItems.forEach((item, index) => {
+                const menuItemEl = document.createElement('li');
+                menuItemEl.className = 'menu-item';
+                
+                let content = `<div class="item-content">`;
+                content += `<span class="item-label">${item.label}</span>`;
+                content += `<i class="chevron fa-solid fa-angle-right"></i>`;
+                content += `</div>`;
+                
+                menuItemEl.innerHTML = content;
+                menuItemsEl.appendChild(menuItemEl);
+
+                menuItemEl.addEventListener('click', () => {
+                    if (window.parent) {
+                        window.parent.postMessage({ action: 'select', tabIndex: item.tabIndex, isContentPanel: false }, '*');
+                    }
+                });
+            });
+
+            breadcrumbEl.textContent = 'JIGGY MENU';
+            counterEl.textContent = `${state.activeTab + 1} / ${state.tabs.length}`;
+            
+            selectedIndex = state.activeTab;
+            updateSelection(menuItems);
+
+            isContentPanelOpen = state.isContentPanelOpen;
+            if (isContentPanelOpen) {
+                statusPanel.style.visibility = 'visible';
+                statusPanel.classList.add('visible');
+                const activeTab = state.tabs[state.activeTab];
+                if (activeTab) {
+                    statusHeader.textContent = activeTab.header || activeTab.title;
+                    populateStatusContent(activeTab, state);
+                }
+            } else {
+                statusPanel.style.visibility = 'hidden';
+                statusPanel.classList.remove('visible');
+            }
+
+            const activeTab = state.tabs[state.activeTab];
+            footerEl.textContent = activeTab ? (activeTab.description || `Current Tab: ${activeTab.title}`) : '';
+            
+            // Show the menu with animation
+            menuContainer.style.visibility = 'visible';
+            menuContainer.classList.add('visible');
+        }
+
+        function renderMenu(menuId) {
+            const menu = defaultMenuData[menuId];
+            if (!menu) return;
+
+            currentMenuId = menuId;
+            breadcrumbEl.textContent = menu.title;
+            menuItemsEl.innerHTML = `<div class="selection-highlight" id="selection-highlight"></div>`;
+            highlightEl = document.getElementById('selection-highlight');
+            
+            const itemsToRender = menu.items.map(item => {
+                if (item.target) return { ...item, type: 'submenu' };
+                return item;
+            });
+
+            if (menu.parent) {
+                itemsToRender.unshift({ type: 'back', label: 'Back', icon: 'fa-solid fa-arrow-left', description: 'Return to the previous menu.' });
+            }
+
+            itemsToRender.forEach((item, index) => {
+                const menuItemEl = document.createElement('li');
+                menuItemEl.className = 'menu-item';
+                
+                let content = `<div class="item-content">`;
+                if (item.icon) content += `<i class="icon ${item.icon}"></i>`;
+                content += `<span class="item-label">${item.label}</span>`;
+
+                if (item.type === 'submenu' || item.type === 'player') {
+                    content += `<i class="chevron fa-solid fa-angle-right"></i>`;
+                } else if (item.type === 'toggle') {
+                    const isChecked = optionStates[item.stateId] || false;
+                    content += `<div class="item-value"><span class="toggle-indicator ${isChecked ? 'on' : 'off'}">${isChecked ? 'ON' : 'OFF'}</span></div>`;
+                } else if (item.type === 'slider') {
+                    const value = optionStates[item.stateId] || item.min;
+                    const percent = ((value - item.min) / (item.max - item.min)) * 100;
+                    content += `<div class="item-value slider-container"><div class="slider-bar"><div class="slider-fill" style="width: ${percent}%"></div></div></div>`;
+                }
+                content += `</div>`;
+                menuItemEl.innerHTML = content;
+                menuItemsEl.appendChild(menuItemEl);
+            });
+            
+            selectedIndex = 0;
+            updateSelection(itemsToRender);
+            
+            // Show the menu with animation
+            menuContainer.style.visibility = 'visible';
+            menuContainer.classList.add('visible');
+        }
+        
+        function updateSelection(itemsToRender) {
+            const items = menuItemsEl.querySelectorAll('.menu-item');
+            if (!items[selectedIndex]) return;
+
+            items.forEach((item, i) => item.classList.toggle('selected', i === selectedIndex));
+            
+            const itemTop = selectedIndex * ITEM_HEIGHT;
+            const itemBottom = itemTop + ITEM_HEIGHT;
+            const scrollTop = menuItemsEl.scrollTop;
+            const containerHeight = menuItemsEl.clientHeight;
+            
+            if (itemTop < scrollTop) {
+                menuItemsEl.scrollTop = itemTop;
+            } else if (itemBottom > scrollTop + containerHeight) {
+                menuItemsEl.scrollTop = itemBottom - containerHeight;
+            }
+
+            highlightEl.style.top = `${itemTop - menuItemsEl.scrollTop}px`;
+            
+            counterEl.textContent = `${selectedIndex + 1} / ${items.length}`;
+            const currentItemData = itemsToRender[selectedIndex];
+            footerEl.textContent = currentItemData?.description || '';
+        }
+
+        function handleMenuInput(e) {
+            if (currentState) return;
+
+            e.preventDefault();
+            const menu = defaultMenuData[currentMenuId];
+            const itemsToRender = menu.items.map(item => item.target ? { ...item, type: 'submenu' } : item);
+            if (menu.parent) {
+                itemsToRender.unshift({ type: 'back', label: 'Back', icon: 'fa-solid fa-arrow-left', description: 'Return to the previous menu.' });
+            }
+            const currentItemData = itemsToRender[selectedIndex];
+            
+            switch (e.key) {
+                case 'ArrowUp':
+                    selectedIndex = (selectedIndex - 1 + itemsToRender.length) % itemsToRender.length;
+                    break;
+                case 'ArrowDown':
+                    selectedIndex = (selectedIndex + 1) % itemsToRender.length;
+                    break;
+                case 'Enter':
+                    if (currentItemData.target) {
+                        navigationStack.push(currentMenuId);
+                        renderMenu(currentItemData.target);
+                    } else if (currentItemData.type === 'button') {
+                        showNotificationBar(`Action: ${currentItemData.label}`, 'info');
+                    } else if (currentItemData.type === 'toggle') {
+                        optionStates[currentItemData.stateId] = !optionStates[currentItemData.stateId];
+                        showNotificationBar(`${currentItemData.label}: ${optionStates[currentItemData.stateId] ? 'Enabled' : 'Disabled'}`, optionStates[currentItemData.stateId] ? 'success' : 'error');
+                        renderMenu(currentMenuId);
+                    } else if (currentItemData.type === 'input') {
+                        showInputPrompt(`Enter value for ${currentItemData.label}:`, currentItemData.placeholder, (result) => {
+                            if (result) showNotificationBar(`Set ${currentItemData.label} to: ${result}`, 'success');
+                        });
+                    } else if (currentItemData.type === 'back') {
+                        const parentMenu = navigationStack.pop();
+                        renderMenu(parentMenu || 'main');
+                    }
+                    break;
+                case 'Backspace':
+                    if (navigationStack.length > 0) {
+                        const parentMenu = navigationStack.pop();
+                        renderMenu(parentMenu);
+                    }
+                    break;
+            }
+            updateSelection(itemsToRender);
+        }
+        
+        window.addEventListener("message", (event) => {
+            const { action, data } = event.data;
+            
+            if (action === "update" || action === "show") {
+                if (data) {
+                    updateMenuFromState(data);
+                    if (action === "show" && !welcomeMessageShown) {
+                        welcomeMessageShown = true;
+                        showNotificationBar("Jiggy Menu loaded successfully", 'success', 5000);
+                    }
+                }
+            }
+            
+            if (action === 'hide') {
+                menuContainer.classList.remove('visible');
+                setTimeout(() => {
+                    menuContainer.style.visibility = 'hidden';
+                }, 300);
+                
+                statusPanel.classList.remove('visible');
+                setTimeout(() => {
+                    statusPanel.style.visibility = 'hidden';
+                }, 300);
+            }
+        });
+        
+        document.onkeydown = handleMenuInput;
+        renderMenu('main');
+        
+        const headerImage = document.querySelector('.header-image');
+        const bannerEl = document.getElementById('jiggy-status-banner');
+        
+        bannerEl.classList.add('loading');
+
+        const img = new Image();
+        img.onload = () => {
+            bannerEl.classList.remove('loading');
+        };
+        img.onerror = () => {
+            bannerEl.classList.remove('loading');
+        };
+        img.src = 'https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png';
+    });
+</script>
+
+</body>
+</html>
