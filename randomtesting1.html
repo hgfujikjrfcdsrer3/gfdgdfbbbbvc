@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plug Menu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: rgba(10, 10, 10, 0.92);
+            --primary-text: #ffffff;
+            --secondary-text: #b0b0b0;
+            --accent-color: #8A2BE2;
+            --highlight-bg: #800080;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --font: 'Inter', sans-serif;
+            --border-radius: 8px;
+            --transition-speed: 0.1s;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
+            background-color: transparent;
+            color: var(--primary-text);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .hidden { display: none !important; }
+
+        .menu-container {
+            position: absolute;
+            top: 15vh;
+            left: 5vw;
+            width: 450px;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            visibility: hidden;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .header-image {
+            width: 100%;
+            height: 80px;
+            background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border-color);
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+        }
+
+        .menu-tabs {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .menu-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--secondary-text);
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: rgba(138, 43, 226, 0.3);
+        }
+
+        .tab.active {
+            color: var(--primary-text);
+            border-bottom: 2px solid var(--accent-color);
+            background: rgba(138, 43, 226, 0.2);
+        }
+
+        .menu-content {
+            position: relative;
+            height: 410px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .menu-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 11px 15px;
+            font-size: 15px;
+            position: relative;
+            height: 41px;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item:hover {
+            background: rgba(138, 43, 226, 0.3) !important;
+            cursor: pointer;
+        }
+
+        .menu-item.selected {
+            background: var(--highlight-bg);
+        }
+
+        .item-content {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        .item-label { flex-grow: 1; }
+        .item-value { color: var(--primary-text); font-weight: 500; }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--accent-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .slider-bar {
+            width: 120px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            position: relative;
+        }
+        .slider-fill {
+            height: 100%;
+            background: var(--primary-text);
+            border-radius: 4px;
+        }
+        .slider-container { display: flex; align-items: center; gap: 10px; }
+
+        .footer {
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid var(--border-color);
+            min-height: 20px;
+            font-size: 13px;
+            color: var(--secondary-text);
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #notification-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .notification { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--primary-text); padding: 10px 20px; border-radius: 8px; border-left: 4px solid var(--accent-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); opacity: 0; animation: slideIn 0.3s forwards, slideOut 0.3s 2.7s forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        
+        .input-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .popup-content {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            width: 400px;
+        }
+
+        .popup-content h3 {
+            margin-bottom: 15px;
+            color: var(--primary-text);
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .popup-content input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .popup-content input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .popup-buttons button {
+            padding: 8px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .popup-buttons button:hover {
+            background: rgba(138, 43, 226, 0.3);
+        }
+
+        .popup-buttons button.confirm {
+            background: var(--accent-color);
+        }
+
+        .popup-buttons button.confirm:hover {
+            background: #9932CC;
+        }
+
+        .popup-content small {
+            color: var(--secondary-text);
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .status-on { color: #2ecc71; font-weight: 600; }
+        .status-off { color: #ff4757; font-weight: 600; }
+        .status-unknown { color: #f39c12; font-weight: 600; }
+
+        .jiggy-status-banner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .jiggy-status-banner.loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .section-header {
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.3);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-button {
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .back-button i {
+            margin-right: 8px;
+        }
+
+        .back-button:hover {
+            background: rgba(138, 43, 226, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="notification-container"></div>
+
+<div class="menu-container" id="menu-container">
+    <div class="header-image"></div>
+    <div class="menu-tabs" id="menu-tabs">
+        <!-- Tabs will be generated here -->
+    </div>
+    <div class="menu-content" id="menu-content">
+        <!-- Tab content will be generated here -->
+    </div>
+    <div class="footer" id="footer">
+        <span id="footer-text">Plug Menu</span>
+        <span id="option-counter">1/1</span>
+    </div>
+</div>
+
+<div class="jiggy-status-banner" id="jiggy-status-banner">
+    UNDETECTED
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuContainer = document.getElementById('menu-container');
+        const menuTabs = document.getElementById('menu-tabs');
+        const menuContent = document.getElementById('menu-content');
+        const footerText = document.getElementById('footer-text');
+        const optionCounter = document.getElementById('option-counter');
+        const notificationContainer = document.getElementById('notification-container');
+        const banner = document.getElementById('jiggy-status-banner');
+
+        let currentState = null;
+        let selectedTabIndex = 0;
+        let selectedItemIndex = 0;
+        let optionStates = {};
+        let welcomeMessageShown = false;
+        let isTyping = false;
+        let capsLockOn = false;
+        let navigationStack = [];
+
+        // Default menu data for initial loading
+        const defaultMenuData = {
+            tabs: [
+                {
+                    key: 'main',
+                    title: 'Loading...',
+                    items: [
+                        { label: 'Loading Menu', type: 'label', description: 'Please Wait While The Menu Loads.' }
+                    ]
+                }
+            ],
+            activeTab: 0
+        };
+
+        function safeEncode(text) {
+            if (!text || typeof text !== 'string') return '';
+            return text.replace(/&/g, '&')
+                        .replace(/</g, '<')
+                        .replace(/>/g, '>')
+                        .replace(/"/g, '"')
+                        .replace(/'/g, ''');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            notificationContainer.appendChild(notification);
+            setTimeout(() => { notification.remove(); }, 3000);
+        }
+
+        function showInputPopup(title, defaultValue, callback) {
+            // Remove any existing popup
+            const existingPopup = document.querySelector('.input-popup');
+            if (existingPopup) existingPopup.remove();
+
+            const popup = document.createElement('div');
+            popup.className = 'input-popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h3>${safeEncode(title)}</h3>
+                    <input type="text" value="${safeEncode(defaultValue || '')}" placeholder="Enter value...">
+                    <div class="popup-buttons">
+                        <button class="cancel">Cancel</button>
+                        <button class="confirm">Confirm</button>
+                    </div>
+                    <small>Press Enter to confirm, Escape to cancel</small>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            const input = popup.querySelector('input');
+            input.focus();
+            
+            const close = () => {
+                popup.remove();
+                isTyping = false;
+            };
+            
+            popup.querySelector('.cancel').addEventListener('click', () => {
+                close();
+            });
+            
+            popup.querySelector('.confirm').addEventListener('click', () => {
+                callback(input.value);
+                close();
+            });
+
+            // Handle keyboard events
+            const keyHandler = (e) => {
+                if (e.key === 'Enter') {
+                    callback(input.value);
+                    close();
+                    document.removeEventListener('keydown', keyHandler);
+                } else if (e.key === 'Escape') {
+                    close();
+                    document.removeEventListener('keydown', keyHandler);
+                }
+            };
+            
+            document.addEventListener('keydown', keyHandler);
+            isTyping = true;
+        }
+
+        function renderTabs(state) {
+            menuTabs.innerHTML = '';
+            
+            state.tabs.forEach((tab, index) => {
+                const tabEl = document.createElement('div');
+                tabEl.className = 'tab';
+                tabEl.classList.toggle('active', index === state.activeTab);
+                tabEl.textContent = tab.title;
+                tabEl.dataset.tabIndex = index;
+                
+                tabEl.addEventListener('click', () => {
+                    if (window.parent) {
+                        window.parent.postMessage({ action: 'select', tabIndex: index, isContentPanel: false }, '*');
+                    }
+                });
+                
+                menuTabs.appendChild(tabEl);
+            });
+        }
+
+        function renderTabContent(state) {
+            menuContent.innerHTML = '';
+            
+            const activeTab = state.tabs[state.activeTab];
+            if (!activeTab) return;
+            
+            const tabContent = document.createElement('div');
+            tabContent.className = 'tab-content active';
+            tabContent.dataset.tabKey = activeTab.key;
+            
+            // If we're in a sub-menu, add a back button
+            if (navigationStack.length > 0) {
+                const backButton = document.createElement('div');
+                backButton.className = 'back-button';
+                backButton.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Back';
+                backButton.addEventListener('click', () => {
+                    const prevState = navigationStack.pop();
+                    if (prevState) {
+                        updateMenuFromState(prevState);
+                    }
+                });
+                tabContent.appendChild(backButton);
+            }
+            
+            // Add section header if needed
+            if (activeTab.header && activeTab.header !== activeTab.title) {
+                const sectionHeader = document.createElement('div');
+                sectionHeader.className = 'section-header';
+                sectionHeader.textContent = activeTab.header;
+                tabContent.appendChild(sectionHeader);
+            }
+            
+            // Add items
+            if (activeTab.items && activeTab.items.length > 0) {
+                activeTab.items.forEach((item, index) => {
+                    const menuItem = document.createElement('div');
+                    menuItem.className = 'menu-item';
+                    menuItem.classList.toggle('selected', index === selectedItemIndex);
+                    
+                    let content = '';
+                    
+                    if (item.type === 'toggle' || item.state === 'on' || item.state === 'off') {
+                        // Toggle switch
+                        const isOn = item.state === 'on';
+                        content = `
+                            <div class="item-content">
+                                <span class="item-label">${safeEncode(item.label)}</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" ${isOn ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        `;
+                    } else if (item.type === 'input') {
+                        // Input field (will be replaced with popup)
+                        content = `
+                            <div class="item-content">
+                                <span class="item-label">${safeEncode(item.label)}</span>
+                                <span class="item-value">${safeEncode(item.value || '')}</span>
+                            </div>
+                        `;
+                    } else if (item.type === 'slider') {
+                        // Slider
+                        const value = item.value || item.min || 0;
+                        const min = item.min || 0;
+                        const max = item.max || 100;
+                        const percent = ((value - min) / (max - min)) * 100;
+                        content = `
+                            <div class="item-content">
+                                <span class="item-label">${safeEncode(item.label)}</span>
+                                <div class="item-value slider-container">
+                                    <div class="slider-bar">
+                                        <div class="slider-fill" style="width: ${percent}%"></div>
+                                    </div>
+                                    <span>${value}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Default item (button, label, etc.)
+                        content = `
+                            <div class="item-content">
+                                <span class="item-label">${safeEncode(item.label)}</span>
+                                ${item.type === 'submenu' || item.tabIndex !== undefined ? '<i class="fa-solid fa-angle-right"></i>' : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    menuItem.innerHTML = content;
+                    
+                    menuItem.addEventListener('click', () => {
+                        selectedItemIndex = index;
+                        updateSelection();
+                        
+                        if (item.action) {
+                            item.action(currentState);
+                        } else if (item.type === 'input') {
+                            showInputPopup(item.label, item.value || '', (newValue) => {
+                                item.value = newValue;
+                                renderTabContent(currentState);
+                                showNotification(`Set ${item.label} to: ${newValue}`);
+                                
+                                // Send update to parent if needed
+                                if (window.parent) {
+                                    window.parent.postMessage({ 
+                                        action: 'inputUpdate', 
+                                        tabIndex: state.activeTab,
+                                        itemIndex: index,
+                                        value: newValue
+                                    }, '*');
+                                }
+                            });
+                        } else if (item.tabIndex !== undefined) {
+                            if (window.parent) {
+                                window.parent.postMessage({ 
+                                    action: 'select', 
+                                    tabIndex: item.tabIndex, 
+                                    isContentPanel: false 
+                                }, '*');
+                            }
+                        }
+                    });
+                    
+                    tabContent.appendChild(menuItem);
+                });
+            } else {
+                // No items
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'menu-item';
+                emptyMessage.innerHTML = '<div class="item-content"><span class="item-label">No items available</span></div>';
+                tabContent.appendChild(emptyMessage);
+            }
+            
+            menuContent.appendChild(tabContent);
+            
+            // Update footer
+            footerText.textContent = activeTab.description || `Current Tab: ${activeTab.title}`;
+            optionCounter.textContent = `${selectedItemIndex + 1}/${activeTab.items?.length || 1}`;
+        }
+
+        function updateSelection() {
+            const items = document.querySelectorAll('.menu-item');
+            items.forEach((item, index) => {
+                item.classList.toggle('selected', index === selectedItemIndex);
+            });
+            
+            // Update counter
+            const activeTab = currentState.tabs[currentState.activeTab];
+            optionCounter.textContent = `${selectedItemIndex + 1}/${activeTab.items?.length || 1}`;
+            
+            // Update description
+            const selectedItem = activeTab.items[selectedItemIndex];
+            if (selectedItem && selectedItem.description) {
+                footerText.textContent = selectedItem.description;
+            } else {
+                footerText.textContent = activeTab.description || `Current Tab: ${activeTab.title}`;
+            }
+            
+            // Ensure selected item is visible
+            const selectedElement = document.querySelector('.menu-item.selected');
+            if (selectedElement) {
+                const containerRect = menuContent.getBoundingClientRect();
+                const elementRect = selectedElement.getBoundingClientRect();
+                
+                if (elementRect.top < containerRect.top) {
+                    menuContent.scrollTop -= (containerRect.top - elementRect.top);
+                } else if (elementRect.bottom > containerRect.bottom) {
+                    menuContent.scrollTop += (elementRect.bottom - containerRect.bottom);
+                }
+            }
+        }
+
+        function updateMenuFromState(state) {
+            if (!state || !state.tabs) return;
+            
+            currentState = state;
+            selectedTabIndex = state.activeTab;
+            selectedItemIndex = state.selection?.index || 0;
+            
+            renderTabs(state);
+            renderTabContent(state);
+        }
+
+        function handleMenuInput(e) {
+            if (!currentState || isTyping) return;
+            
+            e.preventDefault();
+            const activeTab = currentState.tabs[currentState.activeTab];
+            const items = activeTab.items || [];
+            
+            switch (e.key) {
+                case 'ArrowUp':
+                    selectedItemIndex = (selectedItemIndex - 1 + items.length) % items.length;
+                    updateSelection();
+                    break;
+                    
+                case 'ArrowDown':
+                    selectedItemIndex = (selectedItemIndex + 1) % items.length;
+                    updateSelection();
+                    break;
+                    
+                case 'ArrowLeft':
+                    // Previous tab
+                    if (currentState.activeTab > 0) {
+                        if (window.parent) {
+                            window.parent.postMessage({ 
+                                action: 'select', 
+                                tabIndex: currentState.activeTab - 1, 
+                                isContentPanel: false 
+                            }, '*');
+                        }
+                    }
+                    break;
+                    
+                case 'ArrowRight':
+                    // Next tab
+                    if (currentState.activeTab < currentState.tabs.length - 1) {
+                        if (window.parent) {
+                            window.parent.postMessage({ 
+                                action: 'select', 
+                                tabIndex: currentState.activeTab + 1, 
+                                isContentPanel: false 
+                            }, '*');
+                        }
+                    }
+                    break;
+                    
+                case 'Enter':
+                    const selectedItem = items[selectedItemIndex];
+                    if (!selectedItem) return;
+                    
+                    if (selectedItem.action) {
+                        selectedItem.action(currentState);
+                    } else if (selectedItem.type === 'input') {
+                        showInputPopup(selectedItem.label, selectedItem.value || '', (newValue) => {
+                            selectedItem.value = newValue;
+                            renderTabContent(currentState);
+                            showNotification(`Set ${selectedItem.label} to: ${newValue}`);
+                            
+                            // Send update to parent if needed
+                            if (window.parent) {
+                                window.parent.postMessage({ 
+                                    action: 'inputUpdate', 
+                                    tabIndex: currentState.activeTab,
+                                    itemIndex: selectedItemIndex,
+                                    value: newValue
+                                }, '*');
+                            }
+                        });
+                    } else if (selectedItem.tabIndex !== undefined) {
+                        if (window.parent) {
+                            window.parent.postMessage({ 
+                                action: 'select', 
+                                tabIndex: selectedItem.tabIndex, 
+                                isContentPanel: false 
+                            }, '*');
+                        }
+                    }
+                    break;
+                    
+                case 'Backspace':
+                    // Go back if in a sub-menu
+                    if (navigationStack.length > 0) {
+                        const prevState = navigationStack.pop();
+                        if (prevState) {
+                            updateMenuFromState(prevState);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        // Handle messages from parent
+        window.addEventListener("message", (event) => {
+            const { action, data } = event.data;
+            
+            if (action === "update" || action === "show") {
+                if (data) {
+                    // If we're navigating to a sub-menu, save current state
+                    if (currentState && data.isSubMenu) {
+                        navigationStack.push(JSON.parse(JSON.stringify(currentState)));
+                    }
+                    
+                    updateMenuFromState(data);
+                    menuContainer.style.visibility = 'visible';
+                    
+                    if (action === "show" && !welcomeMessageShown) {
+                        welcomeMessageShown = true;
+                        showNotification("Plug Menu loaded successfully");
+                    }
+                }
+            }
+            
+            if (action === 'hide') {
+                menuContainer.style.visibility = 'hidden';
+            }
+        });
+        
+        // Initialize
+        document.onkeydown = handleMenuInput;
+        updateMenuFromState(defaultMenuData);
+        menuContainer.style.visibility = 'visible';
+        
+        // Banner loading animation
+        banner.classList.add('loading');
+        const img = new Image();
+        img.onload = () => {
+            banner.classList.remove('loading');
+        };
+        img.onerror = () => {
+            banner.classList.remove('loading');
+        };
+        img.src = 'https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png';
+    });
+</script>
+
+</body>
+</html>
