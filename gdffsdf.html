@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Plug Menu</title>
+    <title>Plug Menu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -10,7 +11,7 @@
     
     <style>
         :root {
-            --bg-color: rgba(0, 0, 1, 1);
+            --bg-color: rgba(10, 10, 10, 0.92);
             --primary-text: #ffffff;
             --secondary-text: #b0b0b0;
             --accent-color: #8A2BE2;
@@ -47,107 +48,83 @@
             visibility: hidden;
         }
 
-        .header {
-            padding: 15px;
+        .header-image {
+            width: 100%;
+            height: 100px;
+            background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png');
+            background-size: cover;
+            background-position: center;
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
         }
 
-        .header-top {
+        .breadcrumb-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.3);
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
         }
-
-        .header-image {
-            width: 100%;
-            height: 80px;
-            background-size: cover;
-            background-position: center;
-            border-radius: var(--border-radius);
-            margin-top: 5px;
-        }
-
-        .menu-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary-text);
-        }
-
-        .menu-subtitle {
-            font-size: 12px;
-            color: var(--secondary-text);
-            display: flex;
-            justify-content: space-between;
-        }
-
         #breadcrumb { color: var(--secondary-text); text-transform: uppercase; }
         #option-counter { color: var(--primary-text); }
 
         .menu-items {
             list-style: none;
             position: relative;
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 5px 0;
+            height: 410px;
+            overflow: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .menu-items::-webkit-scrollbar {
+            display: none;
         }
 
         .menu-item {
-            padding: 12px 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            padding: 11px 15px;
+            font-size: 15px;
             position: relative;
-            transition: background-color var(--transition-speed);
-            cursor: pointer;
+            height: 41px;
         }
-
-        .menu-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .menu-item.selected {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
+        
         .selection-highlight {
             position: absolute;
             left: 0;
-            width: 3px;
-            background-color: var(--accent-color);
-            height: 40px;
-            transition: transform var(--transition-speed);
-        }
-
-        .item-icon {
-            width: 20px;
-            text-align: center;
-            color: var(--accent-color);
+            width: 100%;
+            height: 41px;
+            background: var(--highlight-bg);
+            z-index: 1;
+            transition: top var(--transition-speed) ease-out;
         }
 
         .item-content {
-            flex-grow: 1;
             display: flex;
-            flex-direction: column;
-            gap: 3px;
+            width: 100%;
+            align-items: center;
+            z-index: 2;
         }
-
-        .item-description {
-            font-size: 12px;
-            color: var(--secondary-text);
-        }
-
+        
         .item-label { flex-grow: 1; }
-        .item-value { color: var(--primary-text); font-weight: 500; }
-
-        /* Toggle Styles */
+        .item-value { 
+            color: var(--primary-text); 
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
         .toggle-indicator { font-weight: 600; }
         .toggle-indicator.on { color: #2ecc71; }
         .toggle-indicator.off { color: #ff4757; }
 
-        /* Slider Styles */
         .slider-bar {
             width: 120px;
             height: 8px;
@@ -157,238 +134,277 @@
         }
         .slider-fill {
             height: 100%;
-            background: var(--accent-color);
+            background: var(--primary-text);
             border-radius: 4px;
         }
         .slider-container { display: flex; align-items: center; gap: 10px; }
-        .slider-value {
-            min-width: 30px;
-            text-align: right;
-            font-size: 12px;
-            color: var(--primary-text);
-        }
-
-        /* Checkbox Styles */
-        .checkbox-container {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--accent-color);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.3);
-        }
-        .checkbox-inner {
-            width: 12px;
-            height: 12px;
-            background: var(--accent-color);
-            border-radius: 2px;
-            opacity: 0;
-            transition: opacity var(--transition-speed);
-        }
-        .checkbox-inner.checked {
-            opacity: 1;
-        }
-
-        /* Slider Checkbox Styles */
-        .slider-checkbox-container {
-            width: 40px;
-            height: 20px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            position: relative;
-            border: 1px solid var(--border-color);
-            transition: background-color var(--transition-speed);
-        }
-        .slider-checkbox-container.checked {
-            background: var(--accent-color);
-        }
-        .slider-checkbox-handle {
-            width: 16px;
-            height: 16px;
-            background: #fff;
-            border-radius: 50%;
-            position: absolute;
-            top: 1px;
-            left: 1px;
-            transition: transform var(--transition-speed);
-        }
-        .slider-checkbox-handle.checked {
-            transform: translateX(20px);
-        }
 
         .footer {
             padding: 10px 15px;
             background: rgba(0,0,0,0.3);
             border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
+            min-height: 20px;
+            font-size: 13px;
             color: var(--secondary-text);
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
         }
 
-        .footer-controls {
-            display: flex;
-            gap: 15px;
-        }
-
-        .footer-control {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .footer-key {
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            padding: 2px 5px;
-            font-size: 10px;
-            color: var(--primary-text);
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--bg-color);
-            border-left: 3px solid var(--accent-color);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            max-width: 300px;
-            animation: slideIn 0.3s ease forwards;
-            z-index: 1000;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .notification-message {
-            font-size: 14px;
-            color: var(--secondary-text);
-        }
-
+        #notification-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .notification { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--primary-text); padding: 10px 20px; border-radius: 8px; border-left: 4px solid var(--accent-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); opacity: 0; animation: slideIn 0.3s forwards, slideOut 0.3s 2.7s forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        
         .input-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
             display: flex; align-items: center; justify-content: center; z-index: 10000;
         }
-
         .input-box {
+            background: var(--bg-color); padding: 25px; border-radius: var(--border-radius);
+            border: 1px solid var(--border-color); width: 400px; text-align: center;
+        }
+        .input-box h3 { margin-bottom: 15px; font-size: 18px; }
+        .input-box input {
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color); color: var(--primary-text);
+            border-radius: 6px; font-size: 16px; text-align: center;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-box input:focus { 
+            outline: none; 
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
+        .input-box input:hover {
+            border-color: rgba(138, 43, 226, 0.6);
+        }
+        .input-box small { color: var(--secondary-text); margin-top: 10px; display: block; }
+
+        .status-panel {
+            position: absolute;
+            right: 50px;
+            top: 15vh;
+            width: 350px;
+            height: 500px;
             background: var(--bg-color);
             border-radius: var(--border-radius);
-            padding: 20px;
-            width: 350px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             border: 1px solid var(--border-color);
+            visibility: hidden;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
-        .input-title {
+        .status-panel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .status-header {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border-color);
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 15px;
+            text-align: center;
         }
 
-        .input-field {
+        .status-content {
+            padding: 15px;
+            position: relative;
+        }
+
+        .status-selection-highlight {
+            position: absolute;
+            left: 0;
             width: 100%;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--primary-text);
-            margin-bottom: 15px;
+            background: var(--highlight-bg);
+            z-index: 1;
+            transition: top var(--transition-speed) ease-out;
+            opacity: 0;
         }
 
-        .input-controls {
+        .status-item-external {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .input-button {
+            justify-content: space-between;
+            align-items: center;
             padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            position: relative;
+            z-index: 2;
+            transition: background-color 0.2s ease;
+        }
+
+        .status-item-external:last-child {
+            border-bottom: none;
+        }
+
+        .status-item-external.selected {
+            background: rgba(138, 43, 226, 0.3);
+            margin: 0 -15px;
+            padding: 8px 15px;
+        }
+
+        .status-item-external:hover {
+            background: rgba(138, 43, 226, 0.2) !important;
             cursor: pointer;
-            font-family: var(--font);
-            font-weight: 500;
         }
 
-        .input-button.cancel {
-            background: rgba(255,255,255,0.1);
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 11px 15px;
+            font-size: 15px;
+            position: relative;
+            height: 41px;
+            transition: background-color 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(138, 43, 226, 0.3) !important;
+            cursor: pointer;
+        }
+
+        .status-item-input {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 2;
+            transition: background-color 0.2s ease;
+        }
+
+        .status-item-input:hover {
+            background: rgba(138, 43, 226, 0.2) !important;
+            cursor: pointer;
+        }
+
+        .status-item-input:hover input {
+            border-color: var(--accent-color) !important;
+            background: rgba(0,0,0,0.6) !important;
+            box-shadow: 0 0 0 1px rgba(138, 43, 226, 0.4) !important;
+        }
+
+        .status-item-input {
+            transition: all 0.2s ease;
+        }
+
+        .status-item-input input {
+            transition: all 0.2s ease;
+        }
+
+        .status-on { color: #2ecc71; font-weight: 600; }
+        .status-off { color: #ff4757; font-weight: 600; }
+        .status-unknown { color: #f39c12; font-weight: 600; }
+
+        .jiggy-status-banner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .jiggy-status-banner.loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* NEW STYLES */
+        .checkbox-indicator {
+            font-size: 1.2em;
+        }
+        .checkbox-indicator.checked { color: #2ecc71; }
+        .checkbox-indicator.unchecked { color: var(--secondary-text); }
+
+        .multi-option-value {
             color: var(--primary-text);
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+        }
+        .multi-option-arrow {
+            font-weight: 700;
+            color: var(--secondary-text);
         }
 
-        .input-button.confirm {
-            background: var(--accent-color);
-            color: var(--primary-text);
-        }
-
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
     </style>
 </head>
 <body>
-    <div class="menu-container" id="menu-container">
-        <div class="header">
-            <div class="header-top">
-            </div>
-            <div class="header-image" style="background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png');"></div>
-            <div class="menu-subtitle">
-                <div id="breadcrumb">Main Menu</div>
-                <div id="option-counter">1/5</div>
-            </div>
-        </div>
-        
-        <div class="menu-items" id="menu-items">
-            <div class="selection-highlight" id="selection-highlight"></div>
-            <!-- Menu items will be populated here -->
-        </div>
-        
-        <div class="footer">
-            <div class="footer-info">Made By CodePlug</div>
-            <div class="footer-controls">
-                <div class="footer-control">
-                    <div class="footer-key">Arrow Keys</div>
-                    <div>Navigate</div>
-                </div>
-                <div class="footer-control">
-                    <div class="footer-key">Enter</div>
-                    <div>Select</div>
-                </div>
-                <div class="footer-control">
-                    <div class="footer-key">Backspace</div>
-                    <div>Back</div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="input-overlay hidden" id="input-overlay">
-        <!-- Input prompt will be populated here -->
-    </div>
+<div id="notification-container"></div>
+<div class="input-overlay hidden" id="input-overlay"></div>
 
-    <script>
-        const menuContainer = document.getElementById('menu-container');
+<div class="menu-container" id="menu-container">
+    <div class="header-image"></div>
+    <div class="breadcrumb-bar">
+        <span id="breadcrumb"></span>
+        <span id="option-counter"></span>
+    </div>
+    <ul class="menu-items" id="menu-items">
+        <div class="selection-highlight" id="selection-highlight"></div>
+    </ul>
+    <div class="footer" id="footer">
+    </div>
+</div>
+
+<div class="status-panel" id="status-panel">
+    <div class="status-header" id="status-header">STATUS</div>
+    <div class="status-content" id="status-content">
+        <div class="status-selection-highlight" id="status-selection-highlight"></div>
+    </div>
+</div>
+
+<div class="jiggy-status-banner" id="jiggy-status-banner">
+    UNDETECTED
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
         const menuItemsEl = document.getElementById('menu-items');
         const breadcrumbEl = document.getElementById('breadcrumb');
-        const optionCounterEl = document.getElementById('option-counter');
+        const counterEl = document.getElementById('option-counter');
+        const footerEl = document.getElementById('footer');
+        let highlightEl = document.getElementById('selection-highlight');
+        const notificationContainer = document.getElementById('notification-container');
         const inputOverlay = document.getElementById('input-overlay');
-        
-        let highlightEl = null;
-        let selectedIndex = 0;
-        let navigationStack = [];
+        const menuContainer = document.getElementById('menu-container');
+        const statusPanel = document.getElementById('status-panel');
+        const statusHeader = document.getElementById('status-header');
+        const statusContent = document.getElementById('status-content');
+        const statusHighlight = document.getElementById('status-selection-highlight');
+        const banner = document.getElementById('jiggy-status-banner');
+
         let currentMenuId = 'main';
+        let navigationStack = [];
+        let selectedIndex = 0;
+        let statusSelectedIndex = 0;
         let optionStates = {};
         let currentState = null;
-        
+        let isContentPanelOpen = false;
+        let welcomeMessageShown = false;
+        const MAX_VISIBLE_ITEMS = 10;
+        const ITEM_HEIGHT = 41;
+
         const defaultMenuData = {
             main: {
                 title: 'Loading Plug Menu...',
                 items: [
-                    { label: 'Loading Plug Menu.', target: 'self', description: 'Wait for plug menu to load nigga.' },
+                    { label: 'Loading Menu', target: 'self', description: 'Please Wait While The Menu Loads.' },
                 ]
             }
         };
@@ -396,48 +412,44 @@
         function safeEncode(text) {
             if (!text || typeof text !== 'string') return '';
             return text.replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
         }
 
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.className = 'notification';
-            notification.innerHTML = `<div class="notification-message">${safeEncode(message)}</div>`;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease forwards';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
+            notification.textContent = message;
+            notificationContainer.appendChild(notification);
+            setTimeout(() => { notification.remove(); }, 3000);
         }
+        
+        const primaryKeyHandler = (e) => {
+            if (!document.getElementById('input-overlay').classList.contains('hidden')) {
+                return; 
+            }
+            handleMenuInput(e);
+        };
 
         function showInputPrompt(title, placeholder, callback) {
             inputOverlay.innerHTML = `
                 <div class="input-box">
-                    <div class="input-title">${safeEncode(title)}</div>
-                    <input type="text" class="input-field" placeholder="${safeEncode(placeholder)}" id="input-field">
-                    <div class="input-controls">
-                        <button class="input-button cancel" id="input-cancel">Cancel</button>
-                        <button class="input-button confirm" id="input-confirm">Confirm</button>
-                    </div>
+                    <h3>${title}</h3>
+                    <input type="text" id="prompt-input" placeholder="${placeholder}">
+                    <small>Press Enter to submit, Escape to cancel.</small>
                 </div>
             `;
-            
             inputOverlay.classList.remove('hidden');
-            const inputField = document.getElementById('input-field');
-            const cancelBtn = document.getElementById('input-cancel');
-            const confirmBtn = document.getElementById('input-confirm');
-            
+            const inputField = document.getElementById('prompt-input');
             inputField.focus();
-            
+
             const close = () => {
                 inputOverlay.classList.add('hidden');
-                document.onkeydown = handleMenuInput;
+                document.onkeydown = primaryKeyHandler;
             };
-            
+
             const keyHandler = (e) => {
                 if (e.key === 'Enter') {
                     callback(inputField.value);
@@ -447,54 +459,199 @@
                 }
             };
             document.onkeydown = keyHandler;
-            
-            cancelBtn.onclick = close;
-            confirmBtn.onclick = () => {
-                callback(inputField.value);
-                close();
-            };
         }
 
-        function updateSelection(items) {
+        function updateStatusSelection(items) {
             if (!items || items.length === 0) return;
             
-            const itemElements = menuItemsEl.querySelectorAll('.menu-item');
-            if (!itemElements[selectedIndex]) return;
+            const itemElements = statusContent.querySelectorAll('.status-item-external, .status-item-input');
+            if (!itemElements[statusSelectedIndex]) return;
+
+            let itemTop = 0;
+            let itemHeight = 0;
             
-            // Calculate the position and height of the selected item
-            const itemRect = itemElements[selectedIndex].getBoundingClientRect();
-            const menuRect = menuItemsEl.getBoundingClientRect();
-            
-            // Update the highlight position
-            if (highlightEl) {
-                highlightEl.style.transform = `translateY(${selectedIndex * itemRect.height}px)`;
-                highlightEl.style.height = `${itemRect.height}px`;
+            for (let i = 0; i < statusSelectedIndex; i++) {
+                if (itemElements[i]) {
+                    itemTop += itemElements[i].offsetHeight;
+                }
             }
             
-            // Update the option counter
-            optionCounterEl.textContent = `${selectedIndex + 1}/${items.length}`;
+            if (itemElements[statusSelectedIndex]) {
+                itemHeight = itemElements[statusSelectedIndex].offsetHeight;
+            }
+
+            statusHighlight.style.top = `${itemTop}px`;
+            statusHighlight.style.height = `${itemHeight}px`;
+            statusHighlight.style.opacity = '1';
+
+            const statusContentEl = statusContent.parentElement;
+            const scrollTop = statusContentEl.scrollTop;
+            const containerHeight = statusContentEl.clientHeight - statusHeader.offsetHeight;
+            const itemBottom = itemTop + itemHeight;
             
-            // Ensure the selected item is visible in the scrollable area
-            const itemTop = itemElements[selectedIndex].offsetTop;
-            const itemBottom = itemTop + itemElements[selectedIndex].offsetHeight;
+            const contentPadding = 15;
+            const adjustedItemTop = itemTop + statusHeader.offsetHeight + contentPadding;
+            const adjustedItemBottom = adjustedItemTop + itemHeight;
             
-            if (itemTop < menuItemsEl.scrollTop) {
-                menuItemsEl.scrollTop = itemTop;
-            } else if (itemBottom > menuItemsEl.scrollTop + menuItemsEl.clientHeight) {
-                menuItemsEl.scrollTop = itemBottom - menuItemsEl.clientHeight;
+            if (adjustedItemTop < scrollTop + statusHeader.offsetHeight) {
+                statusContentEl.scrollTop = adjustedItemTop - statusHeader.offsetHeight;
+            } else if (adjustedItemBottom > scrollTop + statusContentEl.clientHeight) {
+                statusContentEl.scrollTop = adjustedItemBottom - statusContentEl.clientHeight;
+            }
+
+            itemElements.forEach((el, i) => {
+                el.classList.toggle('selected', i === statusSelectedIndex);
+            });
+        }
+
+        function populateStatusContent(tabData, state) {
+            statusContent.innerHTML = '<div class="status-selection-highlight" id="status-selection-highlight"></div>';
+            const statusHighlightEl = document.getElementById('status-selection-highlight');
+            
+            if (!tabData || !tabData.items || !Array.isArray(tabData.items)) return;
+
+            tabData.items.forEach((item, index) => {
+                const element = document.createElement('div');
+                element.className = 'status-item-external';
+                
+                let contentHTML = '';
+                const safeLabel = safeEncode(item.label || 'Unknown');
+
+                switch (item.type) {
+                    case 'checkbox':
+                        const isChecked = item.state === true || item.state === 'ON';
+                        const iconClass = isChecked ? 'fa-solid fa-square-check' : 'fa-regular fa-square';
+                        const colorClass = isChecked ? 'checked' : 'unchecked';
+                        contentHTML = `<span>${safeLabel}</span><div class="item-value"><i class="checkbox-indicator ${colorClass} ${iconClass}"></i></div>`;
+                        break;
+
+                    case 'slider':
+                        const min = item.min || 0;
+                        const max = item.max || 100;
+                        const value = item.value || min;
+                        const percent = ((value - min) / (max - min)) * 100;
+                        contentHTML = `
+                            <span>${safeLabel}</span>
+                            <div class="item-value slider-container">
+                                <span>[${safeEncode(String(value))}]</span>
+                                <div class="slider-bar">
+                                    <div class="slider-fill" style="width: ${percent}%"></div>
+                                </div>
+                            </div>`;
+                        break;
+
+                    case 'multioption':
+                        const contents = item.contents || [];
+                        const currentIndex = (item.current || 1) - 1; // Lua is 1-based, JS is 0-based
+                        const currentValue = contents[currentIndex] || 'N/A';
+                        contentHTML = `
+                            <span>${safeLabel}</span>
+                            <div class="item-value">
+                                <span class="multi-option-arrow">&lt;</span>
+                                <span class="multi-option-value">${safeEncode(currentValue)}</span>
+                                <span class="multi-option-arrow">&gt;</span>
+                            </div>`;
+                        break;
+                    
+                    case 'input':
+                        element.className = 'status-item-input';
+                        contentHTML = `
+                            <div style="width: 100%;">
+                                <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeLabel}</label>
+                                <input type="text" style="width: 100%; padding: 5px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--primary-text); border-radius: 3px; transition: border-color 0.2s ease, background-color 0.2s ease;" value="${safeEncode(item.value || '')}" readonly>
+                            </div>`;
+                        break;
+                    
+                    default:
+                        const isToggleOrState = (item.type === 'toggle' || (item.label && (item.label.toLowerCase().includes('toggle') || item.label.toLowerCase().includes('enabled') || item.label.toLowerCase().includes('boost') || item.label.toLowerCase().includes('crasher'))));
+                        const isResourceState = (tabData.key === 'resources' && item.state !== undefined);
+
+                        if (isToggleOrState || isResourceState) {
+                            const statusClass = item.state ? (item.state === 'ON' ? 'status-on' : item.state === '' ? 'status-off' : 'status-unknown') : 'status-off';
+                            const statusText = item.state ? item.state : '';
+                            contentHTML = `<span>${safeLabel}</span><span class="${statusClass}">${safeEncode(statusText)}</span>`;
+                        } else {
+                            contentHTML = `<span>${safeLabel}</span>`;
+                        }
+                        break;
+                }
+                
+                element.innerHTML = contentHTML;
+
+                element.addEventListener('click', () => {
+                    statusSelectedIndex = index;
+                    updateStatusSelection(tabData.items);
+                });
+                statusContent.appendChild(element);
+            });
+
+            if (state.selection && state.selection.index !== undefined) {
+                statusSelectedIndex = state.selection.index;
+            } else {
+                statusSelectedIndex = 0;
             }
             
-            // Update description if available
-            const currentItem = items[selectedIndex];
-            if (currentItem && currentItem.description) {
-                // You could add a description element if needed
+            window.statusHighlight = statusHighlightEl;
+            updateStatusSelection(tabData.items);
+        }
+        
+        function updateMenuFromState(state) {
+            if (!state || !state.tabs) return;
+
+            currentState = state;
+            
+            menuItemsEl.innerHTML = `<div class="selection-highlight" id="selection-highlight"></div>`;
+            highlightEl = document.getElementById('selection-highlight');
+            
+            const menuItems = state.tabs.map((tabData, index) => ({
+                label: tabData.title || `Tab ${index + 1}`,
+                tabIndex: index,
+                type: 'tab',
+                description: `Open ${tabData.title || `Tab ${index + 1}`}`
+            }));
+
+            menuItems.forEach((item, index) => {
+                const menuItemEl = document.createElement('li');
+                menuItemEl.className = 'menu-item';
+                
+                let content = `<div class="item-content">`;
+                content += `<span class="item-label">${item.label}</span>`;
+                content += `<i class="chevron fa-solid fa-angle-right"></i>`;
+                content += `</div>`;
+                
+                menuItemEl.innerHTML = content;
+                menuItemsEl.appendChild(menuItemEl);
+
+                menuItemEl.addEventListener('click', () => {
+                });
+            });
+
+            breadcrumbEl.textContent = 'Made By CodePlug';
+            counterEl.textContent = `${state.activeTab + 1} / ${state.tabs.length}`;
+            
+            selectedIndex = state.activeTab;
+            updateSelection(menuItems);
+
+            isContentPanelOpen = state.isContentPanelOpen;
+            if (isContentPanelOpen) {
+                statusPanel.style.visibility = 'visible';
+                const activeTab = state.tabs[state.activeTab];
+                if (activeTab) {
+                    statusHeader.textContent = activeTab.header || activeTab.title;
+                    populateStatusContent(activeTab, state);
+                }
+            } else {
+                statusPanel.style.visibility = 'hidden';
             }
+
+            const activeTab = state.tabs[state.activeTab];
+            footerEl.textContent = activeTab ? (activeTab.description || `Current Tab: ${activeTab.title}`) : '';
         }
 
         function renderMenu(menuId) {
             const menu = defaultMenuData[menuId];
             if (!menu) return;
-            
+
             currentMenuId = menuId;
             breadcrumbEl.textContent = menu.title;
             menuItemsEl.innerHTML = `<div class="selection-highlight" id="selection-highlight"></div>`;
@@ -504,72 +661,28 @@
                 if (item.target) return { ...item, type: 'submenu' };
                 return item;
             });
-            
+
             if (menu.parent) {
                 itemsToRender.unshift({ type: 'back', label: 'Back', icon: 'fa-solid fa-arrow-left', description: 'Return to the previous menu.' });
             }
-            
+
             itemsToRender.forEach((item, index) => {
-                const menuItemEl = document.createElement('div');
+                const menuItemEl = document.createElement('li');
                 menuItemEl.className = 'menu-item';
-                if (index === selectedIndex) menuItemEl.classList.add('selected');
                 
-                let icon = '';
-                switch (item.type) {
-                    case 'submenu':
-                        icon = item.icon || 'fa-solid fa-folder';
-                        break;
-                    case 'back':
-                        icon = 'fa-solid fa-arrow-left';
-                        break;
-                    case 'button':
-                        icon = item.icon || 'fa-solid fa-play';
-                        break;
-                    case 'toggle':
-                        icon = item.icon || 'fa-solid fa-toggle-on';
-                        break;
-                    case 'checkbox':
-                        icon = item.icon || 'fa-solid fa-square-check';
-                        break;
-                    case 'slidercheckbox':
-                        icon = item.icon || 'fa-solid fa-sliders';
-                        break;
-                    case 'slider':
-                        icon = item.icon || 'fa-solid fa-sliders';
-                        break;
-                    case 'input':
-                        icon = item.icon || 'fa-solid fa-keyboard';
-                        break;
-                    default:
-                        icon = item.icon || 'fa-solid fa-circle';
-                }
-                
-                let content = `
-                    <div class="item-icon"><i class="${icon}"></i></div>
-                    <div class="item-content">
-                        <div class="item-label">${safeEncode(item.label)}</div>
-                        ${item.description ? `<div class="item-description">${safeEncode(item.description)}</div>` : ''}
-                    </div>
-                `;
-                
+                let content = `<div class="item-content">`;
+                if (item.icon) content += `<i class="icon ${item.icon}"></i>`;
+                content += `<span class="item-label">${item.label}</span>`;
+
                 if (item.type === 'submenu' || item.type === 'player') {
                     content += `<i class="chevron fa-solid fa-angle-right"></i>`;
                 } else if (item.type === 'toggle') {
                     const isChecked = optionStates[item.stateId] || false;
-                    content += `<div class="item-value toggle-indicator ${isChecked ? 'on' : 'off'}">${isChecked ? 'ON' : 'OFF'}</div>`;
-                } else if (item.type === 'checkbox') {
-                    const isChecked = optionStates[item.stateId] || false;
-                    content += `<div class="checkbox-container"><div class="checkbox-inner ${isChecked ? 'checked' : ''}"></div></div>`;
-                } else if (item.type === 'slidercheckbox') {
-                    const isChecked = optionStates[item.stateId] || false;
-                    content += `<div class="slider-checkbox-container ${isChecked ? 'checked' : ''}"><div class="slider-checkbox-handle ${isChecked ? 'checked' : ''}"></div></div>`;
+                    content += `<div class="item-value"></div>`;
                 } else if (item.type === 'slider') {
                     const value = optionStates[item.stateId] || item.min;
                     const percent = ((value - item.min) / (item.max - item.min)) * 100;
-                    content += `<div class="item-value slider-container">
-                        <div class="slider-bar"><div class="slider-fill" style="width: ${percent}%"></div></div>
-                        <div class="slider-value">${value}</div>
-                    </div>`;
+                    content += `<div class="item-value slider-container"><div class="slider-bar"><div class="slider-fill" style="width: ${percent}%"></div></div></div>`;
                 }
                 content += `</div>`;
                 menuItemEl.innerHTML = content;
@@ -579,10 +692,34 @@
             selectedIndex = 0;
             updateSelection(itemsToRender);
         }
+        
+        function updateSelection(itemsToRender) {
+            const items = menuItemsEl.querySelectorAll('.menu-item');
+            if (!items[selectedIndex]) return;
+
+            items.forEach((item, i) => item.classList.toggle('selected', i === selectedIndex));
+            
+            const itemTop = selectedIndex * ITEM_HEIGHT;
+            const itemBottom = itemTop + ITEM_HEIGHT;
+            const scrollTop = menuItemsEl.scrollTop;
+            const containerHeight = menuItemsEl.clientHeight;
+            
+            if (itemTop < scrollTop) {
+                menuItemsEl.scrollTop = itemTop;
+            } else if (itemBottom > scrollTop + containerHeight) {
+                menuItemsEl.scrollTop = itemBottom - containerHeight;
+            }
+
+            highlightEl.style.top = `${itemTop - menuItemsEl.scrollTop}px`;
+            
+            counterEl.textContent = `${selectedIndex + 1} / ${items.length}`;
+            const currentItemData = itemsToRender[selectedIndex];
+            footerEl.textContent = currentItemData?.description || '';
+        }
 
         function handleMenuInput(e) {
             if (currentState) return;
-            
+
             e.preventDefault();
             const menu = defaultMenuData[currentMenuId];
             const itemsToRender = menu.items.map(item => item.target ? { ...item, type: 'submenu' } : item);
@@ -598,32 +735,6 @@
                 case 'ArrowDown':
                     selectedIndex = (selectedIndex + 1) % itemsToRender.length;
                     break;
-                case 'ArrowLeft':
-                    if (currentItemData.type === 'slider') {
-                        const min = currentItemData.min || 0;
-                        const max = currentItemData.max || 100;
-                        const step = currentItemData.step || 1;
-                        const currentValue = optionStates[currentItemData.stateId] || min;
-                        const newValue = Math.max(min, currentValue - step);
-                        
-                        optionStates[currentItemData.stateId] = newValue;
-                        showNotification(`${currentItemData.label}: ${newValue}`);
-                        renderMenu(currentMenuId);
-                    }
-                    break;
-                case 'ArrowRight':
-                    if (currentItemData.type === 'slider') {
-                        const min = currentItemData.min || 0;
-                        const max = currentItemData.max || 100;
-                        const step = currentItemData.step || 1;
-                        const currentValue = optionStates[currentItemData.stateId] || min;
-                        const newValue = Math.min(max, currentValue + step);
-                        
-                        optionStates[currentItemData.stateId] = newValue;
-                        showNotification(`${currentItemData.label}: ${newValue}`);
-                        renderMenu(currentMenuId);
-                    }
-                    break;
                 case 'Enter':
                     if (currentItemData.target) {
                         navigationStack.push(currentMenuId);
@@ -631,14 +742,6 @@
                     } else if (currentItemData.type === 'button') {
                         showNotification(`Action: ${currentItemData.label}`);
                     } else if (currentItemData.type === 'toggle') {
-                        optionStates[currentItemData.stateId] = !optionStates[currentItemData.stateId];
-                        showNotification(`${currentItemData.label}: ${optionStates[currentItemData.stateId] ? 'Enabled' : 'Disabled'}`);
-                        renderMenu(currentMenuId);
-                    } else if (currentItemData.type === 'checkbox') {
-                        optionStates[currentItemData.stateId] = !optionStates[currentItemData.stateId];
-                        showNotification(`${currentItemData.label}: ${optionStates[currentItemData.stateId] ? 'Checked' : 'Unchecked'}`);
-                        renderMenu(currentMenuId);
-                    } else if (currentItemData.type === 'slidercheckbox') {
                         optionStates[currentItemData.stateId] = !optionStates[currentItemData.stateId];
                         showNotification(`${currentItemData.label}: ${optionStates[currentItemData.stateId] ? 'Enabled' : 'Disabled'}`);
                         renderMenu(currentMenuId);
@@ -665,43 +768,41 @@
             const { action, data } = event.data;
             
             if (action === "update" || action === "show") {
-                if (data && data.tabs) {
-                    defaultMenuData = {};
-                    
-                    // Convert tabs to menu structure
-                    data.tabs.forEach((tab, index) => {
-                        const menuId = tab.id || `menu_${index}`;
-                        defaultMenuData[menuId] = {
-                            title: tab.title,
-                            items: tab.items || [],
-                            parent: tab.parent
-                        };
-                    });
-                    
-                    // Update option states
-                    if (data.options) {
-                        optionStates = { ...optionStates, ...data.options };
-                    }
-                    
-                    if (action === "show") {
-                        renderMenu('main');
-                        menuContainer.style.visibility = 'visible';
-                    } else {
-                        renderMenu(currentMenuId);
+                if (data) {
+                    updateMenuFromState(data);
+                    menuContainer.style.visibility = 'visible';
+                    if (action === "show" && !welcomeMessageShown) {
+                        welcomeMessageShown = true;
+                        showNotification("Plug Menu loaded successfully");
                     }
                 }
-            } else if (action === "hide") {
+            }
+            
+            if (action === 'hide') {
                 menuContainer.style.visibility = 'hidden';
-            } else if (action === "notification") {
-                if (data && data.message) {
-                    showNotification(data.message);
-                }
+                statusPanel.style.visibility = 'hidden';
             }
         });
         
-        document.onkeydown = handleMenuInput;
+        document.onkeydown = primaryKeyHandler;
         renderMenu('main');
         menuContainer.style.visibility = 'visible';
-    </script>
+        
+        const headerImage = document.querySelector('.header-image');
+        const bannerEl = document.getElementById('jiggy-status-banner');
+        
+        bannerEl.classList.add('loading');
+
+        const img = new Image();
+        img.onload = () => {
+            bannerEl.classList.remove('loading');
+        };
+        img.onerror = () => {
+            bannerEl.classList.remove('loading');
+        };
+        img.src = 'https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png';
+    });
+</script>
+
 </body>
 </html>
