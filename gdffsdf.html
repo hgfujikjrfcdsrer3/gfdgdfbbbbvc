@@ -1,0 +1,707 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Plug Menu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: rgba(0, 0, 1, 1);
+            --primary-text: #ffffff;
+            --secondary-text: #b0b0b0;
+            --accent-color: #8A2BE2;
+            --highlight-bg: #800080;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --font: 'Inter', sans-serif;
+            --border-radius: 8px;
+            --transition-speed: 0.1s;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
+            background-color: transparent;
+            color: var(--primary-text);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .hidden { display: none !important; }
+
+        .menu-container {
+            position: absolute;
+            top: 15vh;
+            left: 5vw;
+            width: 420px;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            visibility: hidden;
+        }
+
+        .header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-image {
+            width: 100%;
+            height: 80px;
+            background-size: cover;
+            background-position: center;
+            border-radius: var(--border-radius);
+            margin-top: 5px;
+        }
+
+        .menu-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-text);
+        }
+
+        .menu-subtitle {
+            font-size: 12px;
+            color: var(--secondary-text);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #breadcrumb { color: var(--secondary-text); text-transform: uppercase; }
+        #option-counter { color: var(--primary-text); }
+
+        .menu-items {
+            list-style: none;
+            position: relative;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 5px 0;
+        }
+
+        .menu-item {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            transition: background-color var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item.selected {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .selection-highlight {
+            position: absolute;
+            left: 0;
+            width: 3px;
+            background-color: var(--accent-color);
+            height: 40px;
+            transition: transform var(--transition-speed);
+        }
+
+        .item-icon {
+            width: 20px;
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        .item-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .item-description {
+            font-size: 12px;
+            color: var(--secondary-text);
+        }
+
+        .item-label { flex-grow: 1; }
+        .item-value { color: var(--primary-text); font-weight: 500; }
+
+        /* Toggle Styles */
+        .toggle-indicator { font-weight: 600; }
+        .toggle-indicator.on { color: #2ecc71; }
+        .toggle-indicator.off { color: #ff4757; }
+
+        /* Slider Styles */
+        .slider-bar {
+            width: 120px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            position: relative;
+        }
+        .slider-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        .slider-container { display: flex; align-items: center; gap: 10px; }
+        .slider-value {
+            min-width: 30px;
+            text-align: right;
+            font-size: 12px;
+            color: var(--primary-text);
+        }
+
+        /* Checkbox Styles */
+        .checkbox-container {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+        }
+        .checkbox-inner {
+            width: 12px;
+            height: 12px;
+            background: var(--accent-color);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+        .checkbox-inner.checked {
+            opacity: 1;
+        }
+
+        /* Slider Checkbox Styles */
+        .slider-checkbox-container {
+            width: 40px;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            position: relative;
+            border: 1px solid var(--border-color);
+            transition: background-color var(--transition-speed);
+        }
+        .slider-checkbox-container.checked {
+            background: var(--accent-color);
+        }
+        .slider-checkbox-handle {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            transition: transform var(--transition-speed);
+        }
+        .slider-checkbox-handle.checked {
+            transform: translateX(20px);
+        }
+
+        .footer {
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--secondary-text);
+        }
+
+        .footer-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .footer-key {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            padding: 2px 5px;
+            font-size: 10px;
+            color: var(--primary-text);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-color);
+            border-left: 3px solid var(--accent-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 300px;
+            animation: slideIn 0.3s ease forwards;
+            z-index: 1000;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: var(--secondary-text);
+        }
+
+        .input-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+        }
+
+        .input-box {
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            width: 350px;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--primary-text);
+            margin-bottom: 15px;
+        }
+
+        .input-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .input-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font);
+            font-weight: 500;
+        }
+
+        .input-button.cancel {
+            background: rgba(255,255,255,0.1);
+            color: var(--primary-text);
+        }
+
+        .input-button.confirm {
+            background: var(--accent-color);
+            color: var(--primary-text);
+        }
+
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="menu-container" id="menu-container">
+        <div class="header">
+            <div class="header-top">
+            </div>
+            <div class="header-image" style="background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/plug.png');"></div>
+            <div class="menu-subtitle">
+                <div id="breadcrumb">Main Menu</div>
+                <div id="option-counter">1/5</div>
+            </div>
+        </div>
+        
+        <div class="menu-items" id="menu-items">
+            <div class="selection-highlight" id="selection-highlight"></div>
+            <!-- Menu items will be populated here -->
+        </div>
+        
+        <div class="footer">
+            <div class="footer-info">Made By CodePlug</div>
+            <div class="footer-controls">
+                <div class="footer-control">
+                    <div class="footer-key">Arrow Keys</div>
+                    <div>Navigate</div>
+                </div>
+                <div class="footer-control">
+                    <div class="footer-key">Enter</div>
+                    <div>Select</div>
+                </div>
+                <div class="footer-control">
+                    <div class="footer-key">Backspace</div>
+                    <div>Back</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-overlay hidden" id="input-overlay">
+        <!-- Input prompt will be populated here -->
+    </div>
+
+    <script>
+        const menuContainer = document.getElementById('menu-container');
+        const menuItemsEl = document.getElementById('menu-items');
+        const breadcrumbEl = document.getElementById('breadcrumb');
+        const optionCounterEl = document.getElementById('option-counter');
+        const inputOverlay = document.getElementById('input-overlay');
+        
+        let highlightEl = null;
+        let selectedIndex = 0;
+        let navigationStack = [];
+        let currentMenuId = 'main';
+        let optionStates = {};
+        let currentState = null;
+        
+        const defaultMenuData = {
+            main: {
+                title: 'Loading Plug Menu...',
+                items: [
+                    { label: 'Loading Plug Menu.', target: 'self', description: 'Wait for plug menu to load nigga.' },
+                ]
+            }
+        };
+
+        function safeEncode(text) {
+            if (!text || typeof text !== 'string') return '';
+            return text.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `<div class="notification-message">${safeEncode(message)}</div>`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function showInputPrompt(title, placeholder, callback) {
+            inputOverlay.innerHTML = `
+                <div class="input-box">
+                    <div class="input-title">${safeEncode(title)}</div>
+                    <input type="text" class="input-field" placeholder="${safeEncode(placeholder)}" id="input-field">
+                    <div class="input-controls">
+                        <button class="input-button cancel" id="input-cancel">Cancel</button>
+                        <button class="input-button confirm" id="input-confirm">Confirm</button>
+                    </div>
+                </div>
+            `;
+            
+            inputOverlay.classList.remove('hidden');
+            const inputField = document.getElementById('input-field');
+            const cancelBtn = document.getElementById('input-cancel');
+            const confirmBtn = document.getElementById('input-confirm');
+            
+            inputField.focus();
+            
+            const close = () => {
+                inputOverlay.classList.add('hidden');
+                document.onkeydown = handleMenuInput;
+            };
+            
+            const keyHandler = (e) => {
+                if (e.key === 'Enter') {
+                    callback(inputField.value);
+                    close();
+                } else if (e.key === 'Escape') {
+                    close();
+                }
+            };
+            document.onkeydown = keyHandler;
+            
+            cancelBtn.onclick = close;
+            confirmBtn.onclick = () => {
+                callback(inputField.value);
+                close();
+            };
+        }
+
+        function updateSelection(items) {
+            if (!items || items.length === 0) return;
+            
+            const itemElements = menuItemsEl.querySelectorAll('.menu-item');
+            if (!itemElements[selectedIndex]) return;
+            
+            // Calculate the position and height of the selected item
+            const itemRect = itemElements[selectedIndex].getBoundingClientRect();
+            const menuRect = menuItemsEl.getBoundingClientRect();
+            
+            // Update the highlight position
+            if (highlightEl) {
+                highlightEl.style.transform = `translateY(${selectedIndex * itemRect.height}px)`;
+                highlightEl.style.height = `${itemRect.height}px`;
+            }
+            
+            // Update the option counter
+            optionCounterEl.textContent = `${selectedIndex + 1}/${items.length}`;
+            
+            // Ensure the selected item is visible in the scrollable area
+            const itemTop = itemElements[selectedIndex].offsetTop;
+            const itemBottom = itemTop + itemElements[selectedIndex].offsetHeight;
+            
+            if (itemTop < menuItemsEl.scrollTop) {
+                menuItemsEl.scrollTop = itemTop;
+            } else if (itemBottom > menuItemsEl.scrollTop + menuItemsEl.clientHeight) {
+                menuItemsEl.scrollTop = itemBottom - menuItemsEl.clientHeight;
+            }
+            
+            // Update description if available
+            const currentItem = items[selectedIndex];
+            if (currentItem && currentItem.description) {
+                // You could add a description element if needed
+            }
+        }
+
+        function renderMenu(menuId) {
+            const menu = defaultMenuData[menuId];
+            if (!menu) return;
+            
+            currentMenuId = menuId;
+            breadcrumbEl.textContent = menu.title;
+            menuItemsEl.innerHTML = `<div class="selection-highlight" id="selection-highlight"></div>`;
+            highlightEl = document.getElementById('selection-highlight');
+            
+            const itemsToRender = menu.items.map(item => {
+                if (item.target) return { ...item, type: 'submenu' };
+                return item;
+            });
+            
+            if (menu.parent) {
+                itemsToRender.unshift({ type: 'back', label: 'Back', icon: 'fa-solid fa-arrow-left', description: 'Return to the previous menu.' });
+            }
+            
+            itemsToRender.forEach((item, index) => {
+                const menuItemEl = document.createElement('div');
+                menuItemEl.className = 'menu-item';
+                if (index === selectedIndex) menuItemEl.classList.add('selected');
+                
+                let icon = '';
+                switch (item.type) {
+                    case 'submenu':
+                        icon = item.icon || 'fa-solid fa-folder';
+                        break;
+                    case 'back':
+                        icon = 'fa-solid fa-arrow-left';
+                        break;
+                    case 'button':
+                        icon = item.icon || 'fa-solid fa-play';
+                        break;
+                    case 'toggle':
+                        icon = item.icon || 'fa-solid fa-toggle-on';
+                        break;
+                    case 'checkbox':
+                        icon = item.icon || 'fa-solid fa-square-check';
+                        break;
+                    case 'slidercheckbox':
+                        icon = item.icon || 'fa-solid fa-sliders';
+                        break;
+                    case 'slider':
+                        icon = item.icon || 'fa-solid fa-sliders';
+                        break;
+                    case 'input':
+                        icon = item.icon || 'fa-solid fa-keyboard';
+                        break;
+                    default:
+                        icon = item.icon || 'fa-solid fa-circle';
+                }
+                
+                let content = `
+                    <div class="item-icon"><i class="${icon}"></i></div>
+                    <div class="item-content">
+                        <div class="item-label">${safeEncode(item.label)}</div>
+                        ${item.description ? `<div class="item-description">${safeEncode(item.description)}</div>` : ''}
+                    </div>
+                `;
+                
+                if (item.type === 'submenu' || item.type === 'player') {
+                    content += `<i class="chevron fa-solid fa-angle-right"></i>`;
+                } else if (item.type === 'toggle') {
+                    const isChecked = optionStates[item.stateId] || false;
+                    content += `<div class="item-value toggle-indicator ${isChecked ? 'on' : 'off'}">${isChecked ? 'ON' : 'OFF'}</div>`;
+                } else if (item.type === 'checkbox') {
+                    const isChecked = optionStates[item.stateId] || false;
+                    content += `<div class="checkbox-container"><div class="checkbox-inner ${isChecked ? 'checked' : ''}"></div></div>`;
+                } else if (item.type === 'slidercheckbox') {
+                    const isChecked = optionStates[item.stateId] || false;
+                    content += `<div class="slider-checkbox-container ${isChecked ? 'checked' : ''}"><div class="slider-checkbox-handle ${isChecked ? 'checked' : ''}"></div></div>`;
+                } else if (item.type === 'slider') {
+                    const value = optionStates[item.stateId] || item.min;
+                    const percent = ((value - item.min) / (item.max - item.min)) * 100;
+                    content += `<div class="item-value slider-container">
+                        <div class="slider-bar"><div class="slider-fill" style="width: ${percent}%"></div></div>
+                        <div class="slider-value">${value}</div>
+                    </div>`;
+                }
+                content += `</div>`;
+                menuItemEl.innerHTML = content;
+                menuItemsEl.appendChild(menuItemEl);
+            });
+            
+            selectedIndex = 0;
+            updateSelection(itemsToRender);
+        }
+
+        function handleMenuInput(e) {
+            if (currentState) return;
+            
+            e.preventDefault();
+            const menu = defaultMenuData[currentMenuId];
+            const itemsToRender = menu.items.map(item => item.target ? { ...item, type: 'submenu' } : item);
+            if (menu.parent) {
+                itemsToRender.unshift({ type: 'back', label: 'Back', icon: 'fa-solid fa-arrow-left', description: 'Return to the previous menu.' });
+            }
+            const currentItemData = itemsToRender[selectedIndex];
+            
+            switch (e.key) {
+                case 'ArrowUp':
+                    selectedIndex = (selectedIndex - 1 + itemsToRender.length) % itemsToRender.length;
+                    break;
+                case 'ArrowDown':
+                    selectedIndex = (selectedIndex + 1) % itemsToRender.length;
+                    break;
+                case 'ArrowLeft':
+                    if (currentItemData.type === 'slider') {
+                        const min = currentItemData.min || 0;
+                        const max = currentItemData.max || 100;
+                        const step = currentItemData.step || 1;
+                        const currentValue = optionStates[currentItemData.stateId] || min;
+                        const newValue = Math.max(min, currentValue - step);
+                        
+                        optionStates[currentItemData.stateId] = newValue;
+                        showNotification(`${currentItemData.label}: ${newValue}`);
+                        renderMenu(currentMenuId);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (currentItemData.type === 'slider') {
+                        const min = currentItemData.min || 0;
+                        const max = currentItemData.max || 100;
+                        const step = currentItemData.step || 1;
+                        const currentValue = optionStates[currentItemData.stateId] || min;
+                        const newValue = Math.min(max, currentValue + step);
+                        
+                        optionStates[currentItemData.stateId] = newValue;
+                        showNotification(`${currentItemData.label}: ${newValue}`);
+                        renderMenu(currentMenuId);
+                    }
+                    break;
+                case 'Enter':
+                    if (currentItemData.target) {
+                        navigationStack.push(currentMenuId);
+                        renderMenu(currentItemData.target);
+                    } else if (currentItemData.type === 'button') {
+                        showNotification(`Action: ${currentItemData.label}`);
+                    } else if (currentItemData.type === 'toggle') {
+                        optionStates[currentItemData.stateId] = !optionStates[currentItemData.stateId];
+                        showNotification(`${currentItemData.label}: ${optionStates[currentItemData.stateId] ? 'Enabled' : 'Disabled'}`);
+                        renderMenu(currentMenuId);
+                    } else if (currentItemData.type === 'checkbox') {
+                        optionStates[currentItemData.stateId] = !optionStates[currentItemData.stateId];
+                        showNotification(`${currentItemData.label}: ${optionStates[currentItemData.stateId] ? 'Checked' : 'Unchecked'}`);
+                        renderMenu(currentMenuId);
+                    } else if (currentItemData.type === 'slidercheckbox') {
+                        optionStates[currentItemData.stateId] = !optionStates[currentItemData.stateId];
+                        showNotification(`${currentItemData.label}: ${optionStates[currentItemData.stateId] ? 'Enabled' : 'Disabled'}`);
+                        renderMenu(currentMenuId);
+                    } else if (currentItemData.type === 'input') {
+                        showInputPrompt(`Enter value for ${currentItemData.label}:`, currentItemData.placeholder, (result) => {
+                            if (result) showNotification(`Set ${currentItemData.label} to: ${result}`);
+                        });
+                    } else if (currentItemData.type === 'back') {
+                        const parentMenu = navigationStack.pop();
+                        renderMenu(parentMenu || 'main');
+                    }
+                    break;
+                case 'Backspace':
+                    if (navigationStack.length > 0) {
+                        const parentMenu = navigationStack.pop();
+                        renderMenu(parentMenu);
+                    }
+                    break;
+            }
+            updateSelection(itemsToRender);
+        }
+        
+        window.addEventListener("message", (event) => {
+            const { action, data } = event.data;
+            
+            if (action === "update" || action === "show") {
+                if (data && data.tabs) {
+                    defaultMenuData = {};
+                    
+                    // Convert tabs to menu structure
+                    data.tabs.forEach((tab, index) => {
+                        const menuId = tab.id || `menu_${index}`;
+                        defaultMenuData[menuId] = {
+                            title: tab.title,
+                            items: tab.items || [],
+                            parent: tab.parent
+                        };
+                    });
+                    
+                    // Update option states
+                    if (data.options) {
+                        optionStates = { ...optionStates, ...data.options };
+                    }
+                    
+                    if (action === "show") {
+                        renderMenu('main');
+                        menuContainer.style.visibility = 'visible';
+                    } else {
+                        renderMenu(currentMenuId);
+                    }
+                }
+            } else if (action === "hide") {
+                menuContainer.style.visibility = 'hidden';
+            } else if (action === "notification") {
+                if (data && data.message) {
+                    showNotification(data.message);
+                }
+            }
+        });
+        
+        document.onkeydown = handleMenuInput;
+        renderMenu('main');
+        menuContainer.style.visibility = 'visible';
+    </script>
+</body>
+</html>
