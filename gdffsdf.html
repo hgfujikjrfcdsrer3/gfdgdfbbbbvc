@@ -6,18 +6,18 @@
     <title>Plug Menu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&family=Fira+Mono&family=IBM+Plex+Mono&family=Overpass+Mono&family=Source+Code+Pro:wght@400;700&family=Nova+Mono&family=Orbitron:wght@500;700&family=Chakra+Petch:wght@400;700&family=Iceland&family=Wallpoet&family=Bungee&family=Squada+One&family=Syncopate&family=VT323&family=Press+Start+2P&family=Special+Elite&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&family=Orbitron:wght@400;700&family=BenchNine:wght@400;700&family=Fugaz+One&family=Major+Mono+Display&family=Oxanium:wght@400;700&family=Overpass:wght@400;700&family=Quicksand:wght@400;700&family=Raleway:wght@400;700&family=Shrikhand&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     
     <style>
         :root {
-            --bg-color: rgba(10, 10, 10, 0.92);
-            --primary-text: #ffffff;
-            --secondary-text: #89cff0;
-            --accent-color: #8A2BE2;
+            --bg-color: rgba(8,8,8,8);
+            --primary-text: #8dc2ea;
+            --secondary-text: #0092ff;
+            --accent-color: #ff0000;
             --highlight-bg: #00008b;
             --border-color: rgba(255, 255, 255, 0.15);
-            --font: 'Bungee';
+            --font: 'Fugaz One';
             --border-radius: 8px;
             --transition-speed: 0.1s;
         }
@@ -324,7 +324,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* NEW STYLES */
         .checkbox-indicator {
             font-size: 1.2em;
         }
@@ -542,7 +541,7 @@
 
                     case 'multioption':
                         const contents = item.contents || [];
-                        const currentIndex = (item.current || 1) - 1; // Lua is 1-based, JS is 0-based
+                        const currentIndex = (item.current || 1) - 1;
                         const currentValue = contents[currentIndex] || 'N/A';
                         contentHTML = `
                             <span>${safeLabel}</span>
