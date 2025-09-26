@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cooked Menu</title>
+    <title>Jiggy Menu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&family=Orbitron:wght@400;700&family=BenchNine:wght@400;700&family=Fugaz+One&family=Major+Mono+Display&family=Oxanium:wght@400;700&family=Overpass:wght@400;700&family=Quicksand:wght@400;700&family=Raleway:wght@400;700&family=Shrikhand&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     
     <style>
         :root {
-            --bg-color: rgba(10, 10, 10, 0.92);
-            --primary-text: #ffffff;
-            --secondary-text: #b0b0b0;
-            --accent-color: #8A2BE2;
-            --highlight-bg: #8A2BE2;
+            --bg-color: rgba(18,18,18,18);
+            --primary-text: #949396;
+            --secondary-text: #949396;
+            --accent-color: #fff8f7;
+            --highlight-bg: #810c03;
             --border-color: rgba(255, 255, 255, 0.15);
-            --font: 'Inter', sans-serif;
+            --font: 'Fugaz One';
             --border-radius: 8px;
             --transition-speed: 0.1s;
         }
@@ -51,7 +51,7 @@
         .header-image {
             width: 100%;
             height: 100px;
-            background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/797db1b7188296cc330cf4fed667d6e39da60671/JiggyLogo.png');
+            background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/image_2025-09-26_091956861.png');
             background-size: cover;
             background-position: center;
             border-bottom: 1px solid var(--border-color);
@@ -75,7 +75,7 @@
         .menu-items {
             list-style: none;
             position: relative;
-            height: 410px;
+            height: 400px;
             overflow: hidden;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -112,7 +112,14 @@
         }
         
         .item-label { flex-grow: 1; }
-        .item-value { color: var(--primary-text); font-weight: 500; }
+        .item-value { 
+            color: var(--primary-text); 
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
         
         .toggle-indicator { font-weight: 600; }
         .toggle-indicator.on { color: #2ecc71; }
@@ -174,13 +181,12 @@
         }
         .input-box small { color: var(--secondary-text); margin-top: 10px; display: block; }
 
-        /* Status panel styles */
         .status-panel {
             position: absolute;
             right: 50px;
             top: 15vh;
             width: 350px;
-            height: 500px;
+            height: 650px;
             background: var(--bg-color);
             border-radius: var(--border-radius);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -209,7 +215,6 @@
             position: relative;
         }
 
-        /* Status panel highlight */
         .status-selection-highlight {
             position: absolute;
             left: 0;
@@ -247,7 +252,6 @@
             cursor: pointer;
         }
 
-        /* Add hover effect to main menu items */
         .menu-item {
             display: flex;
             align-items: center;
@@ -263,7 +267,6 @@
             cursor: pointer;
         }
 
-        /* Input hover styling in status panel */
         .status-item-input {
             padding: 10px 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -283,7 +286,6 @@
             box-shadow: 0 0 0 1px rgba(138, 43, 226, 0.4) !important;
         }
 
-        /* Make sure input boxes are easily distinguishable when hovered */
         .status-item-input {
             transition: all 0.2s ease;
         }
@@ -300,7 +302,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            padding: 15px 20px;
+            padding: 6px 16px;
             background: var(--bg-color);
             border-radius: var(--border-radius);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -308,7 +310,7 @@
             font-size: 24px;
             font-weight: 700;
             color: var(--accent-color);
-            opacity: 1;
+            opacity: 0.7;
             transform: translateY(0);
         }
         
@@ -321,6 +323,24 @@
             50% { transform: scale(1.05); opacity: 0.8; }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        .checkbox-indicator {
+            font-size: 1.2em;
+        }
+        .checkbox-indicator.checked { color: #2ecc71; }
+        .checkbox-indicator.unchecked { color: var(--secondary-text); }
+
+        .multi-option-value {
+            color: var(--primary-text);
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+        }
+        .multi-option-arrow {
+            font-weight: 700;
+            color: var(--secondary-text);
+        }
+
     </style>
 </head>
 <body>
@@ -349,7 +369,7 @@
 </div>
 
 <div class="jiggy-status-banner" id="jiggy-status-banner">
-    UNDETECTED
+    JIGGY.LUA
 </div>
 
 <script>
@@ -381,9 +401,9 @@
 
         const defaultMenuData = {
             main: {
-                title: 'Loading Jiggy...',
+                title: 'Loading Jiggy Menu...',
                 items: [
-                    { label: 'Loading Menu', target: 'self', description: 'Please Wait While The Menu Loads.' },
+                    { label: 'Loading Menu', target: 'self', description: 'The Menu Is Loaded Nigga, Press Enter.' },
                 ]
             }
         };
@@ -404,6 +424,13 @@
             notificationContainer.appendChild(notification);
             setTimeout(() => { notification.remove(); }, 3000);
         }
+        
+        const primaryKeyHandler = (e) => {
+            if (!document.getElementById('input-overlay').classList.contains('hidden')) {
+                return; 
+            }
+            handleMenuInput(e);
+        };
 
         function showInputPrompt(title, placeholder, callback) {
             inputOverlay.innerHTML = `
@@ -419,7 +446,7 @@
 
             const close = () => {
                 inputOverlay.classList.add('hidden');
-                document.onkeydown = handleMenuInput;
+                document.onkeydown = primaryKeyHandler;
             };
 
             const keyHandler = (e) => {
@@ -439,7 +466,6 @@
             const itemElements = statusContent.querySelectorAll('.status-item-external, .status-item-input');
             if (!itemElements[statusSelectedIndex]) return;
 
-            // Calculate the position and height of the selected item
             let itemTop = 0;
             let itemHeight = 0;
             
@@ -453,18 +479,15 @@
                 itemHeight = itemElements[statusSelectedIndex].offsetHeight;
             }
 
-            // Update highlight position and make it visible
             statusHighlight.style.top = `${itemTop}px`;
             statusHighlight.style.height = `${itemHeight}px`;
             statusHighlight.style.opacity = '1';
 
-            // Handle scrolling to keep the highlight in view
-            const statusContentEl = statusContent.parentElement; // status-panel
+            const statusContentEl = statusContent.parentElement;
             const scrollTop = statusContentEl.scrollTop;
-            const containerHeight = statusContentEl.clientHeight - statusHeader.offsetHeight; // Account for header
+            const containerHeight = statusContentEl.clientHeight - statusHeader.offsetHeight;
             const itemBottom = itemTop + itemHeight;
             
-            // Adjust for the status content padding (15px)
             const contentPadding = 15;
             const adjustedItemTop = itemTop + statusHeader.offsetHeight + contentPadding;
             const adjustedItemBottom = adjustedItemTop + itemHeight;
@@ -475,7 +498,6 @@
                 statusContentEl.scrollTop = adjustedItemBottom - statusContentEl.clientHeight;
             }
 
-            // Update classes for visual feedback
             itemElements.forEach((el, i) => {
                 el.classList.toggle('selected', i === statusSelectedIndex);
             });
@@ -489,48 +511,85 @@
 
             tabData.items.forEach((item, index) => {
                 const element = document.createElement('div');
+                element.className = 'status-item-external';
                 
-                const isToggleOrState = (item.type === 'toggle' || (item.label && (item.label.toLowerCase().includes('toggle') || item.label.toLowerCase().includes('enabled') || item.label.toLowerCase().includes('boost') || item.label.toLowerCase().includes('crasher'))));
-                const isResourceState = (tabData.key === 'resources' && item.state !== undefined);
+                let contentHTML = '';
+                const safeLabel = safeEncode(item.label || 'Unknown');
 
-                if (item.type === 'input') {
-                    element.className = 'status-item-input';
-                    element.innerHTML = `
-                        <div style="width: 100%;">
-                            <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeEncode(item.label)}</label>
-                            <input type="text" style="width: 100%; padding: 5px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--primary-text); border-radius: 3px; transition: border-color 0.2s ease, background-color 0.2s ease;" value="${safeEncode(item.value || '')}" readonly>
-                        </div>`;
-                } else {
-                    element.className = 'status-item-external';
+                switch (item.type) {
+                    case 'checkbox':
+                        const isChecked = item.state === true || item.state === 'ON';
+                        const iconClass = isChecked ? 'fa-solid fa-square-check' : 'fa-regular fa-square';
+                        const colorClass = isChecked ? 'checked' : 'unchecked';
+                        contentHTML = `<span>${safeLabel}</span><div class="item-value"><i class="checkbox-indicator ${colorClass} ${iconClass}"></i></div>`;
+                        break;
+
+                    case 'slider':
+                        const min = item.min || 0;
+                        const max = item.max || 100;
+                        const value = item.value || min;
+                        const percent = ((value - min) / (max - min)) * 100;
+                        contentHTML = `
+                            <span>${safeLabel}</span>
+                            <div class="item-value slider-container">
+                                <span>[${safeEncode(String(value))}]</span>
+                                <div class="slider-bar">
+                                    <div class="slider-fill" style="width: ${percent}%"></div>
+                                </div>
+                            </div>`;
+                        break;
+
+                    case 'multioption':
+                        const contents = item.contents || [];
+                        const currentIndex = (item.current || 1) - 1;
+                        const currentValue = contents[currentIndex] || 'N/A';
+                        contentHTML = `
+                            <span>${safeLabel}</span>
+                            <div class="item-value">
+                                <span class="multi-option-arrow">&lt;</span>
+                                <span class="multi-option-value">${safeEncode(currentValue)}</span>
+                                <span class="multi-option-arrow">&gt;</span>
+                            </div>`;
+                        break;
                     
-                    if (isToggleOrState || isResourceState) {
-                        const statusClass = item.state ? (item.state === 'ON' ? 'status-on' : item.state === '' ? 'status-off' : 'status-unknown') : 'status-off';
-                        const statusText = item.state ? item.state : '';
-                        element.innerHTML = `<span>${safeEncode(item.label || 'Unknown')}</span><span class="${statusClass}">${safeEncode(statusText)}</span>`;
-                    } else {
-                        element.innerHTML = `<span>${safeEncode(item.label || 'Unknown')}</span>`;
-                    }
+                    case 'input':
+                        element.className = 'status-item-input';
+                        contentHTML = `
+                            <div style="width: 100%;">
+                                <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeLabel}</label>
+                                <input type="text" style="width: 100%; padding: 5px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--primary-text); border-radius: 3px; transition: border-color 0.2s ease, background-color 0.2s ease;" value="${safeEncode(item.value || '')}" readonly>
+                            </div>`;
+                        break;
+                    
+                    default:
+                        const isToggleOrState = (item.type === 'toggle' || (item.label && (item.label.toLowerCase().includes('toggle') || item.label.toLowerCase().includes('enabled') || item.label.toLowerCase().includes('boost') || item.label.toLowerCase().includes('crasher'))));
+                        const isResourceState = (tabData.key === 'resources' && item.state !== undefined);
+
+                        if (isToggleOrState || isResourceState) {
+                            const statusClass = item.state ? (item.state === 'ON' ? 'status-on' : item.state === '' ? 'status-off' : 'status-unknown') : 'status-off';
+                            const statusText = item.state ? item.state : '';
+                            contentHTML = `<span>${safeLabel}</span><span class="${statusClass}">${safeEncode(statusText)}</span>`;
+                        } else {
+                            contentHTML = `<span>${safeLabel}</span>`;
+                        }
+                        break;
                 }
+                
+                element.innerHTML = contentHTML;
 
                 element.addEventListener('click', () => {
                     statusSelectedIndex = index;
                     updateStatusSelection(tabData.items);
-                    if (window.parent) {
-                        window.parent.postMessage({ action: 'select', itemIndex: index, isContentPanel: true }, '*');
-                    }
                 });
-
                 statusContent.appendChild(element);
             });
 
-            // Set initial selection if specified in state
             if (state.selection && state.selection.index !== undefined) {
                 statusSelectedIndex = state.selection.index;
             } else {
                 statusSelectedIndex = 0;
             }
             
-            // Update the highlight reference and position
             window.statusHighlight = statusHighlightEl;
             updateStatusSelection(tabData.items);
         }
@@ -563,9 +622,6 @@
                 menuItemsEl.appendChild(menuItemEl);
 
                 menuItemEl.addEventListener('click', () => {
-                    if (window.parent) {
-                        window.parent.postMessage({ action: 'select', tabIndex: item.tabIndex, isContentPanel: false }, '*');
-                    }
                 });
             });
 
@@ -727,7 +783,7 @@
             }
         });
         
-        document.onkeydown = handleMenuInput;
+        document.onkeydown = primaryKeyHandler;
         renderMenu('main');
         menuContainer.style.visibility = 'visible';
         
@@ -743,33 +799,7 @@
         img.onerror = () => {
             bannerEl.classList.remove('loading');
         };
-        img.src = 'https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/797db1b7188296cc330cf4fed667d6e39da60671/JiggyLogo.png';
-    });
-
-    window.addEventListener("message", (event) => {
-        const data = event.data;
-
-        if (data.action === "getClipboard") {
-            navigator.clipboard.readText().then(text => {
-                fetch(`https://${GetParentResourceName()}/clipboardGet`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text })
-                });
-            }).catch(() => {
-                fetch(`https://${GetParentResourceName()}/clipboardGet`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: "" })
-                });
-            });
-        }
-
-        if (data.action === "setClipboard") {
-            navigator.clipboard.writeText(data.text || "").catch(err => {
-                console.error("Clipboard write failed:", err);
-            });
-        }
+        img.src = 'https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/image_2025-09-26_091956861.png';
     });
 </script>
 
