@@ -6,18 +6,18 @@
     <title>Plug Menu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&family=Orbitron:wght@400;700&family=BenchNine:wght@400;700&family=Fugaz+One&family=Major+Mono+Display&family=Oxanium:wght@400;700&family=Overpass:wght@400;700&family=Quicksand:wght@400;700&family=Raleway:wght@400;700&family=Shrikhand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@200;300;400;600;700;900&family=Orbitron:wght@400;500;700;800;900&family=BenchNine:wght@300;400;700&family=Fugaz+One&family=Major+Mono+Display&family=Oxanium:wght@200;300;400;500;600;700;800&family=Overpass:wght@100;200;300;400;500;600;700;800;900&family=Quicksand:wght@300;400;500;600;700&family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=Shrikhand&family=Roboto:wght@100;300;400;500;700;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Source+Sans+Pro:wght@200;300;400;600;700;900&family=Lato:wght@100;300;400;700;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@300;400;500;600;700&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Ubuntu:wght@300;400;500;700&family=Exo+2:wght@100;200;300;400;500;600;700;800;900&family=Play:wght@400;700&family=Audiowide&family=Electrolize&family=Michroma&family=Syncopate:wght@400;700&family=Tekton+Pro&family=Saira:wght@100;200;300;400;500;600;700;800;900&family=Kanit:wght@100;200;300;400;500;600;700;800;900&family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&family=Bungee&family=Comfortaa:wght@300;400;500;600;700&family=Varela+Round&family=Dosis:wght@200;300;400;500;600;700;800&family=Righteous&family=Fredoka+One&family=Staatliches&family=Squada+One&family=Teko:wght@300;400;500;600;700&family=Anton&family=Bebas+Neue&family=Oswald:wght@200;300;400;500;600;700&family=Barlow:wght@100;200;300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Work+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     
     <style>
         :root {
             --bg-color: rgba(8,8,8,8);
-            --primary-text: #8dc2ea;
-            --secondary-text: #0092ff;
+            --primary-text: #ffffff;
+            --secondary-text: #ffffff;
             --accent-color: #ff0000;
             --highlight-bg: #00008b;
             --border-color: rgba(255, 255, 255, 0.15);
-            --font: 'Fugaz One';
+            --font: 'Bungee';
             --border-radius: 8px;
             --transition-speed: 0.1s;
         }
@@ -644,7 +644,7 @@
             }
 
             const activeTab = state.tabs[state.activeTab];
-            footerEl.textContent = activeTab ? (activeTab.description || `Current Tab: ${activeTab.title}`) : '';
+            footerEl.textContent = activeTab ? (activeTab.description || `Selected Tab: ${activeTab.title}`) : '';
         }
 
         function renderMenu(menuId) {
