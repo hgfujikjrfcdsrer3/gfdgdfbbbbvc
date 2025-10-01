@@ -477,91 +477,88 @@
         }
 
         function getSelectableStatusItems(items) {
-            // Filter out 'organizer' items from the array of menu data items
+            // Filter out 'organizer' items to get only the navigable list
             return items.filter(item => item.type !== 'organizer');
         }
 
         function updateStatusSelection(items) {
             const selectableItems = getSelectableStatusItems(items);
-            if (!selectableItems || selectableItems.length === 0) return;
+            if (!selectableItems || selectableItems.length === 0) {
+                statusHighlight.style.opacity = '0';
+                return;
+            }
             
-            // Get all HTML elements (including organizers)
-            const allItemElements = Array.from(statusContent.children).filter(el => 
-                el.classList.contains('status-item-external') || 
-                el.classList.contains('status-item-input') ||
-                el.classList.contains('status-organizer-item')
+            // Get all visible HTML elements (excluding the highlight itself)
+            const allContentElements = Array.from(statusContent.children).filter(el => 
+                el !== statusHighlight && el.nodeType === 1
             );
             
-            // Find the index of the currently selected element in the list of ALL elements
-            let elementIndex = -1;
-            let currentSelectableIndex = 0;
-            
-            for (let i = 0; i < allItemElements.length; i++) {
-                const itemData = items[i];
-                if (itemData.type !== 'organizer') {
-                    if (currentSelectableIndex === statusSelectedIndex) {
-                        elementIndex = i;
-                        break;
-                    }
-                    currentSelectableIndex++;
-                }
-            }
-            
-            if (elementIndex === -1) return;
-
-            // --- SCROLL CALCULATION FIX ---
             let itemTop = 0;
             let itemHeight = 0;
-            
-            // Calculate itemTop (relative to status-content, including padding for all elements before it)
-            for (let i = 0; i < elementIndex; i++) {
-                if (allItemElements[i]) {
-                    itemTop += allItemElements[i].offsetHeight;
+            let selectedElement = null;
+
+            // Iterate through ALL elements to find the correct physical position (itemTop)
+            for (const el of allContentElements) {
+                const selectableIndexAttr = el.getAttribute('data-selectable-index');
+                
+                // If this is the currently selected, selectable element
+                if (selectableIndexAttr !== null && parseInt(selectableIndexAttr) === statusSelectedIndex) {
+                    selectedElement = el;
+                    itemHeight = el.offsetHeight;
+                    // itemTop is already the total accumulated height of all elements *before* this one.
+                    break; 
                 }
+                
+                // Accumulate height of all previous elements, regardless of type (selectable or organizer)
+                itemTop += el.offsetHeight;
             }
             
-            if (!allItemElements[elementIndex]) return;
-            itemHeight = allItemElements[elementIndex].offsetHeight;
+            if (!selectedElement) {
+                statusHighlight.style.opacity = '0';
+                return;
+            }
 
-            // Set the highlight position (relative to status-content)
+            // Set the highlight position based on accumulated height
             statusHighlight.style.top = `${itemTop}px`;
             statusHighlight.style.height = `${itemHeight}px`;
             statusHighlight.style.opacity = '1';
 
-            // Corrected scroll logic for the Status Panel
-            const statusPanelEl = statusContent.parentElement; // This is the scrollable element (#status-panel)
+            // --- Scroll Logic ---
+            const statusPanelEl = statusContent.parentElement;
             const currentScrollTop = statusPanelEl.scrollTop;
             const statusPanelHeight = statusPanelEl.clientHeight;
             const headerHeight = statusHeader.offsetHeight;
-            const contentPaddingTop = 15; // From .status-content CSS
+            const contentPaddingTop = 15;
 
-            // Absolute position of the item's edges relative to the top of the entire status-panel
+            // Calculate item position relative to the entire #status-panel container
             const itemAbsTop = headerHeight + contentPaddingTop + itemTop;
             const itemAbsBottom = itemAbsTop + itemHeight;
 
-            // SCROLL DOWN: If itemAbsBottom is outside the visible screen at the bottom
+            // SCROLL DOWN: If item is below the visible frame
             if (itemAbsBottom > currentScrollTop + statusPanelHeight) {
-                // Set scrollTop so that the itemAbsBottom is exactly at the bottom edge
+                // Set scrollTop so the bottom of the item aligns with the bottom of the panel
                 statusPanelEl.scrollTop = itemAbsBottom - statusPanelHeight;
             } 
             
-            // SCROLL UP: If itemAbsTop is outside the visible screen at the top
+            // SCROLL UP: If item is above the visible frame
             else if (itemAbsTop < currentScrollTop + headerHeight + contentPaddingTop) {
-                // Set scrollTop so that itemAbsTop is exactly at the top of the content area (below the header)
+                // Set scrollTop so the top of the item aligns with the top of the content area (below header)
                 statusPanelEl.scrollTop = itemAbsTop - headerHeight - contentPaddingTop;
             }
+            // --- End Scroll Logic ---
 
-            // --- END SCROLL CALCULATION FIX ---
-
-            // Update selection class only on selectable elements
-            const selectableElements = statusContent.querySelectorAll('.status-item-external, .status-item-input');
-            selectableElements.forEach((el, i) => {
-                el.classList.toggle('selected', i === statusSelectedIndex);
+            // Update selection class on selectable elements only
+            const selectableElements = statusContent.querySelectorAll('[data-selectable-index]');
+            selectableElements.forEach((el) => {
+                el.classList.toggle('selected', parseInt(el.getAttribute('data-selectable-index')) === statusSelectedIndex);
             });
         }
 
         function navigateStatus(direction) {
-            const selectableItems = getSelectableStatusItems(currentState.tabs[currentState.activeTab].items);
+            if (!currentState || !currentState.tabs[currentState.activeTab]) return;
+            const activeTabData = currentState.tabs[currentState.activeTab];
+            const selectableItems = getSelectableStatusItems(activeTabData.items);
+            
             if (selectableItems.length === 0) return;
 
             let newIndex = statusSelectedIndex;
@@ -573,14 +570,12 @@
             }
             
             statusSelectedIndex = newIndex;
-            updateStatusSelection(currentState.tabs[currentState.activeTab].items);
+            updateStatusSelection(activeTabData.items);
 
-            // Send selection to parent application
             if (window.parent) {
                 window.parent.postMessage({ action: 'select', itemIndex: statusSelectedIndex, isContentPanel: true }, '*');
             }
         }
-
 
         function populateStatusContent(tabData, state) {
             statusContent.innerHTML = '<div class="status-selection-highlight" id="status-selection-highlight"></div>';
@@ -595,16 +590,13 @@
                 let contentHTML = '';
                 const safeLabel = safeEncode(item.label || 'Unknown');
 
-                // *** FIX: Organizer items are NOT selectable ***
                 if (item.type === 'organizer') {
                     element.className = 'status-organizer-item'; 
                     element.innerHTML = `<span>${safeLabel}</span>`;
                     statusContent.appendChild(element);
-                    return; // Skip remaining logic for this non-selectable item
+                    return; // Organizers are NOT selectable, so skip the rest
                 }
-                // **********************************************
 
-                // Existing logic for selectable items
                 if (item.type === 'input') {
                     element.className = 'status-item-input';
                 } else {
@@ -613,6 +605,7 @@
                 
                 switch (item.type) {
                     case 'checkbox':
+                    // ... (content generation for checkbox)
                         const isChecked = item.state === true || item.state === 'ON';
                         const iconClass = isChecked ? 'fa-solid fa-square-check' : 'fa-regular fa-square';
                         const colorClass = isChecked ? 'checked' : 'unchecked';
@@ -620,6 +613,7 @@
                         break;
 
                     case 'slider':
+                    // ... (content generation for slider)
                         const min = item.min || 0;
                         const max = item.max || 100;
                         const value = item.value || min;
@@ -635,6 +629,7 @@
                         break;
 
                     case 'multioption':
+                    // ... (content generation for multioption)
                         const contents = item.contents || [];
                         const currentIndex = (item.current || 1) - 1;
                         const currentValue = contents[currentIndex] || 'N/A';
@@ -648,6 +643,7 @@
                         break;
                     
                     case 'input':
+                    // ... (content generation for input)
                         contentHTML = `
                             <div style="width: 100%;">
                                 <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeLabel}</label>
@@ -656,6 +652,7 @@
                         break;
                     
                     default:
+                    // ... (content generation for default/toggle state)
                         const isToggleOrState = (item.type === 'toggle' || (item.label && (item.label.toLowerCase().includes('toggle') || item.label.toLowerCase().includes('enabled') || item.label.toLowerCase().includes('boost') || item.label.toLowerCase().includes('crasher'))));
                         const isResourceState = (tabData.key === 'resources' && item.state !== undefined);
 
@@ -671,7 +668,9 @@
                 
                 element.innerHTML = contentHTML;
                 
+                // Set the selectable index on the HTML element
                 const selectableIndex = selectableElements.length; 
+                element.setAttribute('data-selectable-index', selectableIndex);
 
                 element.addEventListener('click', () => {
                     statusSelectedIndex = selectableIndex; 
@@ -821,7 +820,7 @@
         }
 
         function handleMenuInput(e) {
-            // If the content panel is open (meaning tabs and selectable items are loaded)
+            // If the content panel is open (Status Panel)
             if (currentState && currentState.isContentPanelOpen && currentState.tabs[currentState.activeTab]) {
                 e.preventDefault();
                 const activeTabData = currentState.tabs[currentState.activeTab];
