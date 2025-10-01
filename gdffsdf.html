@@ -219,6 +219,18 @@
             padding: 15px;
             position: relative;
         }
+        
+        /* --- NEW ORGANIZER STYLE --- */
+        .status-organizer-item {
+            padding: 10px 15px 5px 15px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* -------------------------- */
 
         .status-selection-highlight {
             position: absolute;
@@ -514,13 +526,29 @@
             
             if (!tabData || !tabData.items || !Array.isArray(tabData.items)) return;
 
+            const selectableElements = []; 
+
             tabData.items.forEach((item, index) => {
                 const element = document.createElement('div');
-                element.className = 'status-item-external';
-                
                 let contentHTML = '';
                 const safeLabel = safeEncode(item.label || 'Unknown');
 
+                // --- NEW ORGANIZER LOGIC ---
+                if (item.type === 'organizer') {
+                    element.className = 'status-organizer-item'; 
+                    element.innerHTML = `<span>${safeLabel}</span>`;
+                    statusContent.appendChild(element);
+                    return; // Skip remaining logic for this non-selectable item
+                }
+                // --- END NEW ORGANIZER LOGIC ---
+
+                // Existing logic for selectable items
+                if (item.type === 'input') {
+                    element.className = 'status-item-input';
+                } else {
+                    element.className = 'status-item-external';
+                }
+                
                 switch (item.type) {
                     case 'checkbox':
                         const isChecked = item.state === true || item.state === 'ON';
@@ -558,7 +586,6 @@
                         break;
                     
                     case 'input':
-                        element.className = 'status-item-input';
                         contentHTML = `
                             <div style="width: 100%;">
                                 <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeLabel}</label>
@@ -581,12 +608,17 @@
                 }
                 
                 element.innerHTML = contentHTML;
+                
+                // CORRECTED CLICK LISTENER: Uses the index in the selectableElements array
+                const selectableIndex = selectableElements.length; 
 
                 element.addEventListener('click', () => {
-                    statusSelectedIndex = index;
+                    statusSelectedIndex = selectableIndex; 
                     updateStatusSelection(tabData.items);
                 });
+                
                 statusContent.appendChild(element);
+                selectableElements.push(element); // Add to the selectable list
             });
 
             if (state.selection && state.selection.index !== undefined) {
