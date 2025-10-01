@@ -192,7 +192,7 @@
             right: 50px;
             top: 15vh;
             width: 350px;
-            height: 600px;
+            height: 550px;
             background: var(--bg-color);
             border-radius: var(--border-radius);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -523,31 +523,23 @@
             statusHighlight.style.height = `${itemHeight}px`;
             statusHighlight.style.opacity = '1';
 
-            // --- Corrected Scroll Logic ---
-            const PADDING_TOP = 15; // From .status-content CSS padding: 15px;
-            const statusPanelEl = statusContent.parentElement; // #status-panel
+            const PADDING_TOP = 15;
+            const statusPanelEl = statusContent.parentElement;
             const currentScrollTop = statusPanelEl.scrollTop;
             const statusPanelHeight = statusPanelEl.clientHeight;
             
-            // Total pixel offset of the selected element from the very top of the scrollable content
-            // The content starts with the header, then the 15px padding of .status-content, then the elements (itemTop)
-            const itemTotalOffset = statusHeader.offsetHeight + PADDING_TOP + itemTop; 
+            const itemVisibleTop = PADDING_TOP + itemTop;
+            const itemVisibleBottom = itemVisibleTop + itemHeight;
             
-            // The bottom edge of the item in the *scrollable content*
-            const itemTotalBottom = itemTotalOffset + itemHeight;
-
-            // SCROLL DOWN: If the item's bottom is below the visible scroll area
-            if (itemTotalBottom > currentScrollTop + statusPanelHeight) {
-                // Set scrollTop so that the item's bottom aligns with the panel's bottom edge.
-                statusPanelEl.scrollTop = itemTotalBottom - statusPanelHeight;
+            const viewportTop = currentScrollTop;
+            const viewportBottom = currentScrollTop + statusPanelHeight - statusHeader.offsetHeight;
+            
+            if (itemVisibleBottom > viewportBottom) {
+                statusPanelEl.scrollTop = itemVisibleBottom - statusPanelHeight + statusHeader.offsetHeight;
             } 
-            
-            // SCROLL UP: If the item's top is above the visible scroll area
-            else if (itemTotalOffset < currentScrollTop) {
-                // Set scrollTop so that the item's top aligns with the panel's top edge.
-                statusPanelEl.scrollTop = itemTotalOffset;
+            else if (itemVisibleTop < viewportTop) {
+                statusPanelEl.scrollTop = itemVisibleTop;
             }
-            // --- End Corrected Scroll Logic ---
 
             // Update selection class on selectable elements only
             const selectableElements = statusContent.querySelectorAll('[data-selectable-index]');
