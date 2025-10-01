@@ -192,7 +192,7 @@
             right: 50px;
             top: 15vh;
             width: 350px;
-            height: 750px;
+            height: 550px;
             background: var(--bg-color);
             border-radius: var(--border-radius);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -614,6 +614,10 @@
                 element.addEventListener('click', () => {
                     statusSelectedIndex = selectableIndex; 
                     updateStatusSelection(tabData.items);
+                    // FIX: Send a message to the parent to select the new item.
+                    if (window.parent) {
+                        window.parent.postMessage({ action: 'select', itemIndex: selectableIndex, isContentPanel: true }, '*');
+                    }
                 });
                 
                 statusContent.appendChild(element);
@@ -658,6 +662,10 @@
                 menuItemsEl.appendChild(menuItemEl);
 
                 menuItemEl.addEventListener('click', () => {
+                    // FIX: This listener was empty. Now it sends a message to the parent.
+                    if (window.parent) {
+                        window.parent.postMessage({ action: 'select', tabIndex: item.tabIndex, isContentPanel: false }, '*');
+                    }
                 });
             });
 
