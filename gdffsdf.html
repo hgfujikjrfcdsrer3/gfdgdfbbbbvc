@@ -192,13 +192,13 @@
             right: 50px;
             top: 15vh;
             width: 350px;
-            height: 675px;
+            height: 550px;
             background: var(--bg-color);
             border-radius: var(--border-radius);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             border: 1px solid var(--border-color);
             visibility: hidden;
-            overflow-y: auto;
+            overflow-y: auto; /* This is the scrollable container */
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -480,39 +480,51 @@
             if (!items || items.length === 0) return;
             
             const itemElements = statusContent.querySelectorAll('.status-item-external, .status-item-input');
-            if (!itemElements[statusSelectedIndex]) return;
-
+            
+            // --- SCROLL CALCULATION ---
             let itemTop = 0;
             let itemHeight = 0;
             
+            // Calculate itemTop (relative to status-content, excluding its padding)
             for (let i = 0; i < statusSelectedIndex; i++) {
                 if (itemElements[i]) {
                     itemTop += itemElements[i].offsetHeight;
                 }
             }
             
-            if (itemElements[statusSelectedIndex]) {
-                itemHeight = itemElements[statusSelectedIndex].offsetHeight;
-            }
+            if (!itemElements[statusSelectedIndex]) return;
+            itemHeight = itemElements[statusSelectedIndex].offsetHeight;
 
+            // Set the highlight position
             statusHighlight.style.top = `${itemTop}px`;
             statusHighlight.style.height = `${itemHeight}px`;
             statusHighlight.style.opacity = '1';
 
-            const statusContentEl = statusContent.parentElement;
-            const scrollTop = statusContentEl.scrollTop;
-            const containerHeight = statusContentEl.clientHeight - statusHeader.offsetHeight;
-            const itemBottom = itemTop + itemHeight;
+            // Corrected scroll logic for the Status Panel
+            const statusPanelEl = statusContent.parentElement; // This is the scrollable element
+            const currentScrollTop = statusPanelEl.scrollTop;
+            const statusPanelHeight = statusPanelEl.clientHeight;
+            const headerHeight = statusHeader.offsetHeight;
+            const contentPaddingTop = 15; // From .status-content CSS
+
+            // Absolute position of the item's edges relative to the top of the entire status-panel
+            const itemAbsTop = headerHeight + contentPaddingTop + itemTop;
+            const itemAbsBottom = itemAbsTop + itemHeight;
+
+            // SCROLL DOWN: If itemAbsBottom is outside the visible screen at the bottom
+            if (itemAbsBottom > currentScrollTop + statusPanelHeight) {
+                // Set scrollTop so that the itemAbsBottom is exactly at the bottom edge
+                statusPanelEl.scrollTop = itemAbsBottom - statusPanelHeight;
+            } 
             
-            const contentPadding = 15;
-            const adjustedItemTop = itemTop + statusHeader.offsetHeight + contentPadding;
-            const adjustedItemBottom = adjustedItemTop + itemHeight;
-            
-            if (adjustedItemTop < scrollTop + statusHeader.offsetHeight) {
-                statusContentEl.scrollTop = adjustedItemTop - statusHeader.offsetHeight;
-            } else if (adjustedItemBottom > scrollTop + statusContentEl.clientHeight) {
-                statusContentEl.scrollTop = adjustedItemBottom - statusContentEl.clientHeight;
+            // SCROLL UP: If itemAbsTop is outside the visible screen at the top
+            // The *visible* content starts below the header (headerHeight) plus content padding (contentPaddingTop).
+            else if (itemAbsTop < currentScrollTop + headerHeight + contentPaddingTop) {
+                // Set scrollTop so that itemAbsTop is exactly at the top of the content area (below the header)
+                statusPanelEl.scrollTop = itemAbsTop - headerHeight - contentPaddingTop;
             }
+
+            // --- END SCROLL CALCULATION FIX ---
 
             itemElements.forEach((el, i) => {
                 el.classList.toggle('selected', i === statusSelectedIndex);
@@ -532,16 +544,13 @@
                 let contentHTML = '';
                 const safeLabel = safeEncode(item.label || 'Unknown');
 
-                // --- NEW ORGANIZER LOGIC ---
                 if (item.type === 'organizer') {
                     element.className = 'status-organizer-item'; 
                     element.innerHTML = `<span>${safeLabel}</span>`;
                     statusContent.appendChild(element);
-                    return; // Skip remaining logic for this non-selectable item
+                    return;
                 }
-                // --- END NEW ORGANIZER LOGIC ---
 
-                // Existing logic for selectable items
                 if (item.type === 'input') {
                     element.className = 'status-item-input';
                 } else {
@@ -608,20 +617,19 @@
                 
                 element.innerHTML = contentHTML;
                 
-                // CORRECTED CLICK LISTENER: Uses the index in the selectableElements array
                 const selectableIndex = selectableElements.length; 
 
                 element.addEventListener('click', () => {
                     statusSelectedIndex = selectableIndex; 
                     updateStatusSelection(tabData.items);
-                    // FIX: Send a message to the parent to select the new item.
+                    // FIX: Send message to the parent for content panel selection
                     if (window.parent) {
                         window.parent.postMessage({ action: 'select', itemIndex: selectableIndex, isContentPanel: true }, '*');
                     }
                 });
                 
                 statusContent.appendChild(element);
-                selectableElements.push(element); // Add to the selectable list
+                selectableElements.push(element);
             });
 
             if (state.selection && state.selection.index !== undefined) {
@@ -662,7 +670,7 @@
                 menuItemsEl.appendChild(menuItemEl);
 
                 menuItemEl.addEventListener('click', () => {
-                    // FIX: This listener was empty. Now it sends a message to the parent.
+                    // FIX: This listener was missing the postMessage call.
                     if (window.parent) {
                         window.parent.postMessage({ action: 'select', tabIndex: item.tabIndex, isContentPanel: false }, '*');
                     }
