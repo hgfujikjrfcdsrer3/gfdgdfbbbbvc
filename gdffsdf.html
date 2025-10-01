@@ -493,7 +493,7 @@
                 el !== statusHighlight && el.nodeType === 1
             );
             
-            let itemTop = 0;
+            let itemTop = 0; // Pixel offset from the top of the status-content inner area (after its padding)
             let itemHeight = 0;
             let selectedElement = null;
 
@@ -505,7 +505,7 @@
                 if (selectableIndexAttr !== null && parseInt(selectableIndexAttr) === statusSelectedIndex) {
                     selectedElement = el;
                     itemHeight = el.offsetHeight;
-                    // itemTop is already the total accumulated height of all elements *before* this one.
+                    // itemTop is the total accumulated height of all elements *before* this one.
                     break; 
                 }
                 
@@ -523,29 +523,31 @@
             statusHighlight.style.height = `${itemHeight}px`;
             statusHighlight.style.opacity = '1';
 
-            // --- Scroll Logic ---
-            const statusPanelEl = statusContent.parentElement;
+            // --- Corrected Scroll Logic ---
+            const PADDING_TOP = 15; // From .status-content CSS padding: 15px;
+            const statusPanelEl = statusContent.parentElement; // #status-panel
             const currentScrollTop = statusPanelEl.scrollTop;
             const statusPanelHeight = statusPanelEl.clientHeight;
-            const headerHeight = statusHeader.offsetHeight;
-            const contentPaddingTop = 15;
+            
+            // Total pixel offset of the selected element from the very top of the scrollable content
+            // The content starts with the header, then the 15px padding of .status-content, then the elements (itemTop)
+            const itemTotalOffset = statusHeader.offsetHeight + PADDING_TOP + itemTop; 
+            
+            // The bottom edge of the item in the *scrollable content*
+            const itemTotalBottom = itemTotalOffset + itemHeight;
 
-            // Calculate item position relative to the entire #status-panel container
-            const itemAbsTop = headerHeight + contentPaddingTop + itemTop;
-            const itemAbsBottom = itemAbsTop + itemHeight;
-
-            // SCROLL DOWN: If item is below the visible frame
-            if (itemAbsBottom > currentScrollTop + statusPanelHeight) {
-                // Set scrollTop so the bottom of the item aligns with the bottom of the panel
-                statusPanelEl.scrollTop = itemAbsBottom - statusPanelHeight;
+            // SCROLL DOWN: If the item's bottom is below the visible scroll area
+            if (itemTotalBottom > currentScrollTop + statusPanelHeight) {
+                // Set scrollTop so that the item's bottom aligns with the panel's bottom edge.
+                statusPanelEl.scrollTop = itemTotalBottom - statusPanelHeight;
             } 
             
-            // SCROLL UP: If item is above the visible frame
-            else if (itemAbsTop < currentScrollTop + headerHeight + contentPaddingTop) {
-                // Set scrollTop so the top of the item aligns with the top of the content area (below header)
-                statusPanelEl.scrollTop = itemAbsTop - headerHeight - contentPaddingTop;
+            // SCROLL UP: If the item's top is above the visible scroll area
+            else if (itemTotalOffset < currentScrollTop) {
+                // Set scrollTop so that the item's top aligns with the panel's top edge.
+                statusPanelEl.scrollTop = itemTotalOffset;
             }
-            // --- End Scroll Logic ---
+            // --- End Corrected Scroll Logic ---
 
             // Update selection class on selectable elements only
             const selectableElements = statusContent.querySelectorAll('[data-selectable-index]');
@@ -605,7 +607,6 @@
                 
                 switch (item.type) {
                     case 'checkbox':
-                    // ... (content generation for checkbox)
                         const isChecked = item.state === true || item.state === 'ON';
                         const iconClass = isChecked ? 'fa-solid fa-square-check' : 'fa-regular fa-square';
                         const colorClass = isChecked ? 'checked' : 'unchecked';
@@ -613,7 +614,6 @@
                         break;
 
                     case 'slider':
-                    // ... (content generation for slider)
                         const min = item.min || 0;
                         const max = item.max || 100;
                         const value = item.value || min;
@@ -629,7 +629,6 @@
                         break;
 
                     case 'multioption':
-                    // ... (content generation for multioption)
                         const contents = item.contents || [];
                         const currentIndex = (item.current || 1) - 1;
                         const currentValue = contents[currentIndex] || 'N/A';
@@ -643,7 +642,6 @@
                         break;
                     
                     case 'input':
-                    // ... (content generation for input)
                         contentHTML = `
                             <div style="width: 100%;">
                                 <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeLabel}</label>
@@ -652,7 +650,6 @@
                         break;
                     
                     default:
-                    // ... (content generation for default/toggle state)
                         const isToggleOrState = (item.type === 'toggle' || (item.label && (item.label.toLowerCase().includes('toggle') || item.label.toLowerCase().includes('enabled') || item.label.toLowerCase().includes('boost') || item.label.toLowerCase().includes('crasher'))));
                         const isResourceState = (tabData.key === 'resources' && item.state !== undefined);
 
