@@ -198,7 +198,7 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             border: 1px solid var(--border-color);
             visibility: hidden;
-            overflow-y: auto; /* This is the scrollable container */
+            overflow-y: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -476,32 +476,60 @@
             document.onkeydown = keyHandler;
         }
 
+        function getSelectableStatusItems(items) {
+            // Filter out 'organizer' items from the array of menu data items
+            return items.filter(item => item.type !== 'organizer');
+        }
+
         function updateStatusSelection(items) {
-            if (!items || items.length === 0) return;
+            const selectableItems = getSelectableStatusItems(items);
+            if (!selectableItems || selectableItems.length === 0) return;
             
-            const itemElements = statusContent.querySelectorAll('.status-item-external, .status-item-input');
+            // Get all HTML elements (including organizers)
+            const allItemElements = Array.from(statusContent.children).filter(el => 
+                el.classList.contains('status-item-external') || 
+                el.classList.contains('status-item-input') ||
+                el.classList.contains('status-organizer-item')
+            );
             
-            // --- SCROLL CALCULATION ---
-            let itemTop = 0;
-            let itemHeight = 0;
+            // Find the index of the currently selected element in the list of ALL elements
+            let elementIndex = -1;
+            let currentSelectableIndex = 0;
             
-            // Calculate itemTop (relative to status-content, excluding its padding)
-            for (let i = 0; i < statusSelectedIndex; i++) {
-                if (itemElements[i]) {
-                    itemTop += itemElements[i].offsetHeight;
+            for (let i = 0; i < allItemElements.length; i++) {
+                const itemData = items[i];
+                if (itemData.type !== 'organizer') {
+                    if (currentSelectableIndex === statusSelectedIndex) {
+                        elementIndex = i;
+                        break;
+                    }
+                    currentSelectableIndex++;
                 }
             }
             
-            if (!itemElements[statusSelectedIndex]) return;
-            itemHeight = itemElements[statusSelectedIndex].offsetHeight;
+            if (elementIndex === -1) return;
 
-            // Set the highlight position
+            // --- SCROLL CALCULATION FIX ---
+            let itemTop = 0;
+            let itemHeight = 0;
+            
+            // Calculate itemTop (relative to status-content, including padding for all elements before it)
+            for (let i = 0; i < elementIndex; i++) {
+                if (allItemElements[i]) {
+                    itemTop += allItemElements[i].offsetHeight;
+                }
+            }
+            
+            if (!allItemElements[elementIndex]) return;
+            itemHeight = allItemElements[elementIndex].offsetHeight;
+
+            // Set the highlight position (relative to status-content)
             statusHighlight.style.top = `${itemTop}px`;
             statusHighlight.style.height = `${itemHeight}px`;
             statusHighlight.style.opacity = '1';
 
             // Corrected scroll logic for the Status Panel
-            const statusPanelEl = statusContent.parentElement; // This is the scrollable element
+            const statusPanelEl = statusContent.parentElement; // This is the scrollable element (#status-panel)
             const currentScrollTop = statusPanelEl.scrollTop;
             const statusPanelHeight = statusPanelEl.clientHeight;
             const headerHeight = statusHeader.offsetHeight;
@@ -518,7 +546,6 @@
             } 
             
             // SCROLL UP: If itemAbsTop is outside the visible screen at the top
-            // The *visible* content starts below the header (headerHeight) plus content padding (contentPaddingTop).
             else if (itemAbsTop < currentScrollTop + headerHeight + contentPaddingTop) {
                 // Set scrollTop so that itemAbsTop is exactly at the top of the content area (below the header)
                 statusPanelEl.scrollTop = itemAbsTop - headerHeight - contentPaddingTop;
@@ -526,10 +553,34 @@
 
             // --- END SCROLL CALCULATION FIX ---
 
-            itemElements.forEach((el, i) => {
+            // Update selection class only on selectable elements
+            const selectableElements = statusContent.querySelectorAll('.status-item-external, .status-item-input');
+            selectableElements.forEach((el, i) => {
                 el.classList.toggle('selected', i === statusSelectedIndex);
             });
         }
+
+        function navigateStatus(direction) {
+            const selectableItems = getSelectableStatusItems(currentState.tabs[currentState.activeTab].items);
+            if (selectableItems.length === 0) return;
+
+            let newIndex = statusSelectedIndex;
+
+            if (direction === 'UP') {
+                newIndex = (statusSelectedIndex - 1 + selectableItems.length) % selectableItems.length;
+            } else if (direction === 'DOWN') {
+                newIndex = (statusSelectedIndex + 1) % selectableItems.length;
+            }
+            
+            statusSelectedIndex = newIndex;
+            updateStatusSelection(currentState.tabs[currentState.activeTab].items);
+
+            // Send selection to parent application
+            if (window.parent) {
+                window.parent.postMessage({ action: 'select', itemIndex: statusSelectedIndex, isContentPanel: true }, '*');
+            }
+        }
+
 
         function populateStatusContent(tabData, state) {
             statusContent.innerHTML = '<div class="status-selection-highlight" id="status-selection-highlight"></div>';
@@ -544,13 +595,16 @@
                 let contentHTML = '';
                 const safeLabel = safeEncode(item.label || 'Unknown');
 
+                // *** FIX: Organizer items are NOT selectable ***
                 if (item.type === 'organizer') {
                     element.className = 'status-organizer-item'; 
                     element.innerHTML = `<span>${safeLabel}</span>`;
                     statusContent.appendChild(element);
-                    return;
+                    return; // Skip remaining logic for this non-selectable item
                 }
+                // **********************************************
 
+                // Existing logic for selectable items
                 if (item.type === 'input') {
                     element.className = 'status-item-input';
                 } else {
@@ -622,7 +676,6 @@
                 element.addEventListener('click', () => {
                     statusSelectedIndex = selectableIndex; 
                     updateStatusSelection(tabData.items);
-                    // FIX: Send message to the parent for content panel selection
                     if (window.parent) {
                         window.parent.postMessage({ action: 'select', itemIndex: selectableIndex, isContentPanel: true }, '*');
                     }
@@ -670,7 +723,6 @@
                 menuItemsEl.appendChild(menuItemEl);
 
                 menuItemEl.addEventListener('click', () => {
-                    // FIX: This listener was missing the postMessage call.
                     if (window.parent) {
                         window.parent.postMessage({ action: 'select', tabIndex: item.tabIndex, isContentPanel: false }, '*');
                     }
@@ -769,6 +821,68 @@
         }
 
         function handleMenuInput(e) {
+            // If the content panel is open (meaning tabs and selectable items are loaded)
+            if (currentState && currentState.isContentPanelOpen && currentState.tabs[currentState.activeTab]) {
+                e.preventDefault();
+                const activeTabData = currentState.tabs[currentState.activeTab];
+                const selectableItems = getSelectableStatusItems(activeTabData.items);
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        navigateStatus('UP');
+                        break;
+                    case 'ArrowDown':
+                        navigateStatus('DOWN');
+                        break;
+                    case 'Enter':
+                        // Post message for activation
+                        if (window.parent && selectableItems.length > 0) {
+                            window.parent.postMessage({ action: 'activate', itemIndex: statusSelectedIndex, isContentPanel: true }, '*');
+                        }
+                        break;
+                    case 'Backspace':
+                    case 'Escape':
+                        // Close content panel
+                        if (window.parent) {
+                            window.parent.postMessage({ action: 'closeContentPanel' }, '*');
+                        }
+                        break;
+                }
+                return;
+            }
+            
+            // Default menu navigation (main tabs) - only respond if content panel is NOT open
+            if (currentState && !currentState.isContentPanelOpen) {
+                e.preventDefault();
+                const menuItems = currentState.tabs;
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        selectedIndex = (selectedIndex - 1 + menuItems.length) % menuItems.length;
+                        break;
+                    case 'ArrowDown':
+                        selectedIndex = (selectedIndex + 1) % menuItems.length;
+                        break;
+                    case 'Enter':
+                        // Post message for tab selection/opening
+                        if (window.parent) {
+                            window.parent.postMessage({ action: 'select', tabIndex: selectedIndex, isContentPanel: false }, '*');
+                            window.parent.postMessage({ action: 'activate', tabIndex: selectedIndex, isContentPanel: false }, '*');
+                        }
+                        break;
+                    case 'Backspace':
+                    case 'Escape':
+                        // Hide main menu
+                        if (window.parent) {
+                            window.parent.postMessage({ action: 'hide' }, '*');
+                        }
+                        break;
+                }
+                updateMenuFromState(currentState); // Rerender to update selection highlight
+                return;
+            }
+            
+            // Fallback for default menu (not related to external state)
             if (currentState) return;
 
             e.preventDefault();
