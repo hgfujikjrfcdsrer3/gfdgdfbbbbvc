@@ -11,14 +11,15 @@
     
     <style>
         :root {
-            --bg-color: rgba(18,18,18,18);
-            --primary-text: #949396;
-            --secondary-text: #949396;
-            --accent-color: #fff8f7;
-            --highlight-bg: #810c03;
-            --border-color: rgba(255, 255, 255, 0.15);
-            --font: 'Fugaz One';
-            --border-radius: 8px;
+            --bg-color: rgba(10, 10, 10, 0.95);
+            --bg-gradient: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(87, 2, 2, 0.99) 100%);
+            --primary-text: #ffffff;
+            --secondary-text: #ffffff;
+            --accent-color: #7c0a02;
+            --highlight-bg: linear-gradient(90deg, rgba(136, 0, 0, 1) 0%, rgba(136, 0, 0, 0) 100%);
+            --border-color: rgba(255, 0, 0, 0.99);
+            --font: 'Inter';
+            --border-radius: 20px;
             --transition-speed: 0.1s;
         }
 
@@ -38,20 +39,25 @@
             position: absolute;
             top: 15vh;
             left: 5vw;
-            width: 420px;
-            background: var(--bg-color);
+            width: 440px;
+            background: var(--bg-gradient);
             border-radius: var(--border-radius);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.7),
+                0 0 0 1px var(--border-color),
+                0 0 60px rgba(0, 146, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border-color);
             visibility: hidden;
+            overflow: hidden;
         }
 
         .header-image {
             width: 100%;
             height: 100px;
-            background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/image_2025-09-26_091956861.png');
+            background-image: url('https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/280602ac9f969ad756eb0d8baf43e3313ffe2024/Jiggy/Banner%205.png');
             background-size: cover;
             background-position: center;
             border-bottom: 1px solid var(--border-color);
@@ -65,7 +71,7 @@
             align-items: center;
             padding: 8px 15px;
             background: rgba(0,0,0,0.3);
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             border-bottom: 1px solid var(--border-color);
         }
@@ -75,7 +81,7 @@
         .menu-items {
             list-style: none;
             position: relative;
-            height: 400px;
+            height: 410px;
             overflow: hidden;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -144,7 +150,7 @@
             background: rgba(0,0,0,0.3);
             border-top: 1px solid var(--border-color);
             min-height: 20px;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--secondary-text);
             border-bottom-left-radius: var(--border-radius);
             border-bottom-right-radius: var(--border-radius);
@@ -186,7 +192,7 @@
             right: 50px;
             top: 15vh;
             width: 350px;
-            height: 650px;
+            height: 630px;
             background: var(--bg-color);
             border-radius: var(--border-radius);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -208,11 +214,22 @@
             font-size: 16px;
             font-weight: 600;
             text-align: center;
+            display: none;
         }
 
         .status-content {
             padding: 15px;
             position: relative;
+        }
+        
+        .status-organizer-item {
+            padding: 10px 15px 5px 15px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .status-selection-highlight {
@@ -256,7 +273,7 @@
             display: flex;
             align-items: center;
             padding: 11px 15px;
-            font-size: 15px;
+            font-size: 16px;
             position: relative;
             height: 41px;
             transition: background-color 0.2s ease;
@@ -310,7 +327,7 @@
             font-size: 24px;
             font-weight: 700;
             color: var(--accent-color);
-            opacity: 0.7;
+            opacity: 1;
             transform: translateY(0);
         }
         
@@ -460,47 +477,99 @@
             document.onkeydown = keyHandler;
         }
 
+        function getSelectableStatusItems(items) {
+            // Filter out 'organizer' items to get only the navigable list
+            return items.filter(item => item.type !== 'organizer');
+        }
+
         function updateStatusSelection(items) {
-            if (!items || items.length === 0) return;
+            const selectableItems = getSelectableStatusItems(items);
+            if (!selectableItems || selectableItems.length === 0) {
+                statusHighlight.style.opacity = '0';
+                return;
+            }
             
-            const itemElements = statusContent.querySelectorAll('.status-item-external, .status-item-input');
-            if (!itemElements[statusSelectedIndex]) return;
-
-            let itemTop = 0;
+            // Get all visible HTML elements (excluding the highlight itself)
+            const allContentElements = Array.from(statusContent.children).filter(el => 
+                el !== statusHighlight && el.nodeType === 1
+            );
+            
+            let itemTop = 0; // Pixel offset from the top of the status-content inner area (after its padding)
             let itemHeight = 0;
-            
-            for (let i = 0; i < statusSelectedIndex; i++) {
-                if (itemElements[i]) {
-                    itemTop += itemElements[i].offsetHeight;
+            let selectedElement = null;
+
+            // Iterate through ALL elements to find the correct physical position (itemTop)
+            for (const el of allContentElements) {
+                const selectableIndexAttr = el.getAttribute('data-selectable-index');
+                
+                // If this is the currently selected, selectable element
+                if (selectableIndexAttr !== null && parseInt(selectableIndexAttr) === statusSelectedIndex) {
+                    selectedElement = el;
+                    itemHeight = el.offsetHeight;
+                    // itemTop is the total accumulated height of all elements *before* this one.
+                    break; 
                 }
+                
+                // Accumulate height of all previous elements, regardless of type (selectable or organizer)
+                itemTop += el.offsetHeight;
             }
             
-            if (itemElements[statusSelectedIndex]) {
-                itemHeight = itemElements[statusSelectedIndex].offsetHeight;
+            if (!selectedElement) {
+                statusHighlight.style.opacity = '0';
+                return;
             }
 
+            // Set the highlight position based on accumulated height
             statusHighlight.style.top = `${itemTop}px`;
             statusHighlight.style.height = `${itemHeight}px`;
             statusHighlight.style.opacity = '1';
 
-            const statusContentEl = statusContent.parentElement;
-            const scrollTop = statusContentEl.scrollTop;
-            const containerHeight = statusContentEl.clientHeight - statusHeader.offsetHeight;
-            const itemBottom = itemTop + itemHeight;
+            const PADDING_TOP = 15;
+            const statusPanelEl = statusContent.parentElement;
+            const currentScrollTop = statusPanelEl.scrollTop;
+            const statusPanelHeight = statusPanelEl.clientHeight;
             
-            const contentPadding = 15;
-            const adjustedItemTop = itemTop + statusHeader.offsetHeight + contentPadding;
-            const adjustedItemBottom = adjustedItemTop + itemHeight;
+            const itemVisibleTop = PADDING_TOP + itemTop;
+            const itemVisibleBottom = itemVisibleTop + itemHeight;
             
-            if (adjustedItemTop < scrollTop + statusHeader.offsetHeight) {
-                statusContentEl.scrollTop = adjustedItemTop - statusHeader.offsetHeight;
-            } else if (adjustedItemBottom > scrollTop + statusContentEl.clientHeight) {
-                statusContentEl.scrollTop = adjustedItemBottom - statusContentEl.clientHeight;
+            const viewportTop = currentScrollTop;
+            const viewportBottom = currentScrollTop + statusPanelHeight - statusHeader.offsetHeight;
+            
+            if (itemVisibleBottom > viewportBottom) {
+                statusPanelEl.scrollTop = itemVisibleBottom - statusPanelHeight + statusHeader.offsetHeight;
+            } 
+            else if (itemVisibleTop < viewportTop) {
+                statusPanelEl.scrollTop = itemVisibleTop;
             }
 
-            itemElements.forEach((el, i) => {
-                el.classList.toggle('selected', i === statusSelectedIndex);
+            // Update selection class on selectable elements only
+            const selectableElements = statusContent.querySelectorAll('[data-selectable-index]');
+            selectableElements.forEach((el) => {
+                el.classList.toggle('selected', parseInt(el.getAttribute('data-selectable-index')) === statusSelectedIndex);
             });
+        }
+
+        function navigateStatus(direction) {
+            if (!currentState || !currentState.tabs[currentState.activeTab]) return;
+            const activeTabData = currentState.tabs[currentState.activeTab];
+            const selectableItems = getSelectableStatusItems(activeTabData.items);
+            
+            if (selectableItems.length === 0) return;
+
+            let newIndex = statusSelectedIndex;
+
+            if (direction === 'UP') {
+                newIndex = (statusSelectedIndex - 1 + selectableItems.length) % selectableItems.length;
+            } else if (direction === 'DOWN') {
+                newIndex = (statusSelectedIndex + 1) % selectableItems.length;
+            }
+            
+            statusSelectedIndex = newIndex;
+            updateStatusSelection(activeTabData.items);
+
+            if (window.parent) {
+                window.parent.postMessage({ action: 'select', itemIndex: statusSelectedIndex, isContentPanel: true }, '*');
+            }
         }
 
         function populateStatusContent(tabData, state) {
@@ -509,13 +578,26 @@
             
             if (!tabData || !tabData.items || !Array.isArray(tabData.items)) return;
 
+            const selectableElements = []; 
+
             tabData.items.forEach((item, index) => {
                 const element = document.createElement('div');
-                element.className = 'status-item-external';
-                
                 let contentHTML = '';
                 const safeLabel = safeEncode(item.label || 'Unknown');
 
+                if (item.type === 'organizer') {
+                    element.className = 'status-organizer-item'; 
+                    element.innerHTML = `<span>${safeLabel}</span>`;
+                    statusContent.appendChild(element);
+                    return; // Organizers are NOT selectable, so skip the rest
+                }
+
+                if (item.type === 'input') {
+                    element.className = 'status-item-input';
+                } else {
+                    element.className = 'status-item-external';
+                }
+                
                 switch (item.type) {
                     case 'checkbox':
                         const isChecked = item.state === true || item.state === 'ON';
@@ -553,7 +635,6 @@
                         break;
                     
                     case 'input':
-                        element.className = 'status-item-input';
                         contentHTML = `
                             <div style="width: 100%;">
                                 <label style="display: block; margin-bottom: 5px; font-size: 12px; color: var(--secondary-text);">${safeLabel}</label>
@@ -576,12 +657,21 @@
                 }
                 
                 element.innerHTML = contentHTML;
+                
+                // Set the selectable index on the HTML element
+                const selectableIndex = selectableElements.length; 
+                element.setAttribute('data-selectable-index', selectableIndex);
 
                 element.addEventListener('click', () => {
-                    statusSelectedIndex = index;
+                    statusSelectedIndex = selectableIndex; 
                     updateStatusSelection(tabData.items);
+                    if (window.parent) {
+                        window.parent.postMessage({ action: 'select', itemIndex: selectableIndex, isContentPanel: true }, '*');
+                    }
                 });
+                
                 statusContent.appendChild(element);
+                selectableElements.push(element);
             });
 
             if (state.selection && state.selection.index !== undefined) {
@@ -622,6 +712,9 @@
                 menuItemsEl.appendChild(menuItemEl);
 
                 menuItemEl.addEventListener('click', () => {
+                    if (window.parent) {
+                        window.parent.postMessage({ action: 'select', tabIndex: item.tabIndex, isContentPanel: false }, '*');
+                    }
                 });
             });
 
@@ -644,7 +737,7 @@
             }
 
             const activeTab = state.tabs[state.activeTab];
-            footerEl.textContent = activeTab ? (activeTab.description || `Current Tab: ${activeTab.title}`) : '';
+            footerEl.textContent = activeTab ? (activeTab.description || `Selected Tab: ${activeTab.title}`) : '';
         }
 
         function renderMenu(menuId) {
@@ -717,6 +810,68 @@
         }
 
         function handleMenuInput(e) {
+            // If the content panel is open (Status Panel)
+            if (currentState && currentState.isContentPanelOpen && currentState.tabs[currentState.activeTab]) {
+                e.preventDefault();
+                const activeTabData = currentState.tabs[currentState.activeTab];
+                const selectableItems = getSelectableStatusItems(activeTabData.items);
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        navigateStatus('UP');
+                        break;
+                    case 'ArrowDown':
+                        navigateStatus('DOWN');
+                        break;
+                    case 'Enter':
+                        // Post message for activation
+                        if (window.parent && selectableItems.length > 0) {
+                            window.parent.postMessage({ action: 'activate', itemIndex: statusSelectedIndex, isContentPanel: true }, '*');
+                        }
+                        break;
+                    case 'Backspace':
+                    case 'Escape':
+                        // Close content panel
+                        if (window.parent) {
+                            window.parent.postMessage({ action: 'closeContentPanel' }, '*');
+                        }
+                        break;
+                }
+                return;
+            }
+            
+            // Default menu navigation (main tabs) - only respond if content panel is NOT open
+            if (currentState && !currentState.isContentPanelOpen) {
+                e.preventDefault();
+                const menuItems = currentState.tabs;
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        selectedIndex = (selectedIndex - 1 + menuItems.length) % menuItems.length;
+                        break;
+                    case 'ArrowDown':
+                        selectedIndex = (selectedIndex + 1) % menuItems.length;
+                        break;
+                    case 'Enter':
+                        // Post message for tab selection/opening
+                        if (window.parent) {
+                            window.parent.postMessage({ action: 'select', tabIndex: selectedIndex, isContentPanel: false }, '*');
+                            window.parent.postMessage({ action: 'activate', tabIndex: selectedIndex, isContentPanel: false }, '*');
+                        }
+                        break;
+                    case 'Backspace':
+                    case 'Escape':
+                        // Hide main menu
+                        if (window.parent) {
+                            window.parent.postMessage({ action: 'hide' }, '*');
+                        }
+                        break;
+                }
+                updateMenuFromState(currentState); // Rerender to update selection highlight
+                return;
+            }
+            
+            // Fallback for default menu (not related to external state)
             if (currentState) return;
 
             e.preventDefault();
@@ -781,7 +936,41 @@
                 menuContainer.style.visibility = 'hidden';
                 statusPanel.style.visibility = 'hidden';
             }
-        });
+if (action === 'updateBanner') {
+                const headerImage = document.querySelector('.header-image');
+                if (headerImage) {
+                    headerImage.style.backgroundImage = `url('${data.url}')`;
+                }
+            }
+
+            if (action === 'updatePosition') {
+                menuContainer.style.left = `${data.x}px`;
+                menuContainer.style.top = `${data.y}px`;
+                menuContainer.style.position = 'fixed';
+            }
+            
+            if (action === 'updateColors') {
+                const root = document.documentElement;
+                if (data.primary) {
+                    root.style.setProperty('--accent-color', data.primary);
+                }
+                if (data.border) {
+                    root.style.setProperty('--border-color', data.border);
+                }
+                if (data.background) {
+                    root.style.setProperty('--bg-gradient', data.background);
+                }
+            }
+            
+            if (action === 'updateColors') {
+                const root = document.documentElement;
+                if (data.primary) {
+                    root.style.setProperty('--accent-color', data.primary);
+                }
+                if (data.border) {
+                    root.style.setProperty('--border-color', data.border);
+                }
+            }        });
         
         document.onkeydown = primaryKeyHandler;
         renderMenu('main');
@@ -799,7 +988,7 @@
         img.onerror = () => {
             bannerEl.classList.remove('loading');
         };
-        img.src = 'https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/main/image_2025-09-26_091956861.png';
+        img.src = 'https://raw.githubusercontent.com/hgfujikjrfcdsrer3/gfdgdfbbbbvc/280602ac9f969ad756eb0d8baf43e3313ffe2024/Jiggy/Banner%205.png';
     });
 </script>
 
